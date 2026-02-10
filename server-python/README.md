@@ -3,6 +3,7 @@
 Agora Conversational AI Agent service built with FastAPI.
 
 ## Quick Start
+Follow [Get started with Agora](https://docs.agora.io/en/conversational-ai/get-started/manage-agora-account#enable-conversational-ai) to get the **App ID** and **App Certificate** and enable the **Conversational AI** service.
 
 ### 1. Configure Environment
 
