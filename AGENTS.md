@@ -5,7 +5,7 @@ This document guides AI agents working on the Agora Conversational AI demo proje
 ## Project Overview
 
 A real-time voice conversation application with AI agents, built with:
-- **Frontend**: React + TypeScript + Agora Web SDK
+- **Frontend**: Next.js + React + TypeScript + Agora Web SDK
 - **Backend**: Python FastAPI + Agora Conversational AI API
 
 ## Architecture
@@ -126,8 +126,9 @@ bun run build
 ## Important Notes
 
 - Never commit `.env.local` or credentials
-- Frontend uses Vite dev server (port 5173)
+- Frontend uses Next.js dev server (port 3000)
 - Backend uses uvicorn (port 8000)
+- API requests are proxied from `/api/*` to backend via Next.js rewrites
 - All Agora SDK calls go through `agora-service.ts`
 - State updates trigger React re-renders automatically
 - Agent lifecycle is managed by backend, not frontend
