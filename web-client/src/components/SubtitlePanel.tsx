@@ -1,3 +1,5 @@
+'use client'
+
 import { ETurnStatus } from '@/conversational-ai-api/type'
 import { cn } from '@/lib/utils'
 import { type TranscriptItem, useAppStore } from '@/stores/app-store'

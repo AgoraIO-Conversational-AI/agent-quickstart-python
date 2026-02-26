@@ -1,3 +1,5 @@
+'use client'
+
 import { cn, formatTime } from '@/lib/utils'
 import { type LogItem, type LogLevel, useAppStore } from '@/stores/app-store'
 import { useEffect, useRef, useState } from 'react'

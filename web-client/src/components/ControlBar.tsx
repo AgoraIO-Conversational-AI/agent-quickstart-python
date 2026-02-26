@@ -1,3 +1,5 @@
+'use client'
+
 import { EAgentState } from '@/conversational-ai-api/type'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
