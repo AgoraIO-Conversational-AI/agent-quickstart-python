@@ -21,7 +21,7 @@ from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from agora_rest.agent import TokenBuilder
-from src.agent import Agent
+from agent import Agent
 
 def _to_http_error(exc: Exception) -> HTTPException:
     """Convert SDK exceptions to HTTP errors"""
