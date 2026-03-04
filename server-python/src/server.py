@@ -20,7 +20,7 @@ load_dotenv(os.path.join(_base_dir, '.env'))
 from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from agora_token_builder import RtcTokenBuilder, Role_Publisher
+from agoraio.wrapper.token import generate_rtc_token, ROLE_PUBLISHER
 from agent import Agent
 
 def _to_http_error(exc: Exception) -> HTTPException:
@@ -92,15 +92,14 @@ def get_config():
         app_id = os.getenv("APP_ID")
         app_certificate = os.getenv("APP_CERTIFICATE")
         
-        # Generate token using TokenBuilder
-        token = RtcTokenBuilder.build_token_with_rtm(
+        # Generate token using generate_rtc_token
+        token = generate_rtc_token(
             app_id=app_id,
             app_certificate=app_certificate,
-            channel_name=channel_name,
-            account=str(user_uid),
-            role=Role_Publisher,
-            token_expire=86400,
-            privilege_expire=86400
+            channel=channel_name,
+            uid=int(user_uid),
+            role=ROLE_PUBLISHER,
+            expiry_seconds=86400
         )
         
         config_data = {
