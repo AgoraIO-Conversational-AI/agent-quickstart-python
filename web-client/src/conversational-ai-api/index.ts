@@ -25,15 +25,18 @@ import { EventHelper } from '@/conversational-ai-api/utils/event'
 import { CovSubRenderController } from '@/conversational-ai-api/utils/sub-render'
 import { ELoggerType, logger } from '@/lib/logger'
 import { genTranceID } from '@/lib/utils'
-import type { IAgoraRTCClient } from 'agora-rtc-sdk-ng'
 import type { ChannelType, RTMClient, RTMEvents } from 'agora-rtm'
 
 const TAG = 'ConversationalAIAPI'
 const VERSION = '1.8.0'
 const formatLog = factoryFormatLog({ tag: TAG })
 
+// Use a loose type to support both agora-rtc-sdk-ng and agora-rtc-react
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RTCClientLike = any
+
 export interface IConversationalAIAPIConfig {
-  rtcEngine: IAgoraRTCClient
+  rtcEngine: RTCClientLike
   rtmEngine: RTMClient
   renderMode?: ETranscriptHelperMode
   enableLog?: boolean
@@ -45,7 +48,7 @@ export class ConversationalAIAPI extends EventHelper<IConversationalAIAPIEventHa
   private static _instance: ConversationalAIAPI | null = null
   private callMessagePrint: (type: ELoggerType, ...args: unknown[]) => void
 
-  protected rtcEngine: IAgoraRTCClient | null = null
+  protected rtcEngine: RTCClientLike | null = null
   protected rtmEngine: RTMClient | null = null
   protected renderMode: ETranscriptHelperMode = ETranscriptHelperMode.UNKNOWN
   protected channel: string | null = null
@@ -243,7 +246,7 @@ export class ConversationalAIAPI extends EventHelper<IConversationalAIAPIEventHa
   private _handleRtcAudioPTS(pts: number) {
     try {
       this.covSubRenderController.setPts(pts)
-    } catch {}
+    } catch { }
   }
 
   private _handleRtmMessage(message: RTMEvents.MessageEvent) {
@@ -259,7 +262,7 @@ export class ConversationalAIAPI extends EventHelper<IConversationalAIAPIEventHa
           publisher: message.publisher,
         })
       }
-    } catch {}
+    } catch { }
   }
 
   private _handleRtmPresence(presence: RTMEvents.PresenceEvent) {
@@ -275,7 +278,7 @@ export class ConversationalAIAPI extends EventHelper<IConversationalAIAPIEventHa
 
   private _handleRtmStatus(
     _status: RTMEvents.RTMConnectionStatusChangeEvent | RTMEvents.StreamChannelConnectionStatusChangeEvent,
-  ) {}
+  ) { }
 }
 
 export { EConversationalAIAPIEvents } from '@/conversational-ai-api/type'

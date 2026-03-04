@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@agora-js/report": "^4.24.0",
-    "agora-rtc-sdk-ng": "^4.24.0",
+    "agora-rtc-react": "^2.2.0",
     "agora-rtm": "^2.2.3",
     "lodash": "^4.17.21",
     "next": "^16.1.6",
