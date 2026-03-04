@@ -85,6 +85,7 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 
 ## SDK
 
-This project uses the `agora-rest-client-python` SDK:
-- PyPI: https://pypi.org/project/agora-rest-client-python/
-- Install: `pip install agora-rest-client-python`
+This project uses the local `agora-agent-rest` SDK with high-level wrapper:
+- Location: `./agora-agent-rest/`
+- Wrapper: `agoraio.wrapper.Agent` for fluent agent configuration
+- Vendors: `OpenAI`, `ElevenLabsTTS`, `DeepgramSTT` for LLM/TTS/STT

@@ -197,21 +197,32 @@ except RuntimeError as e:
 
 ### Configuration Pattern
 ```python
-# Load from environment
-config = AgentConfig.from_env()
+from agoraio.wrapper import Agent as AgoraAgent
+from agoraio.wrapper.vendors import OpenAI, ElevenLabsTTS, DeepgramSTT
 
-# Build service configs using agoraio types
-asr = StartAgentsRequestPropertiesAsr(
-    vendor="deepgram",
-    language="en-US",
-    params={"key": config.deepgram_api_key}
+# Create agent with fluent API
+agora_agent = AgoraAgent(
+    name="agent_name",
+    instructions="System prompt",
+    greeting="Hello message",
+    advanced_features={"enable_rtm": True},
+    parameters={"data_channel": "rtm"}
 )
 
-llm = StartAgentsRequestPropertiesLlm(
-    vendor="openai",
-    api_key=config.llm_api_key,
-    url="https://api.openai.com/v1/chat/completions"
+agora_agent = (
+    agora_agent
+    .with_llm(OpenAI(api_key=key, model="gpt-4o-mini"))
+    .with_tts(ElevenLabsTTS(key=key, voice_id=voice_id))
+    .with_stt(DeepgramSTT(api_key=key, language="en-US"))
 )
+
+session = agora_agent.create_session(
+    client=client,
+    channel=channel,
+    agent_uid=agent_uid,
+    remote_uids=[user_uid]
+)
+agent_id = session.start()
 ```
 
 ## Dependencies

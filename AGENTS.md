@@ -17,12 +17,13 @@ A real-time voice conversation application with AI agents, built with:
 ├── web-client/                    # Frontend application
 │   ├── src/
 │   │   ├── components/           # React UI components
-│   │   │   ├── App.tsx           # Main app container
-│   │   │   ├── ControlBar.tsx    # Call controls (start/stop)
-│   │   │   ├── SubtitlePanel.tsx # Live transcription display
-│   │   │   └── LogPanel.tsx      # Event log viewer
+│   │   │   ├── app.tsx           # Main app container
+│   │   │   ├── control-bar.tsx   # Call controls (start/stop)
+│   │   │   ├── subtitle-panel.tsx # Live transcription display
+│   │   │   └── log-panel.tsx     # Event log viewer
+│   │   ├── hooks/                # React hooks
+│   │   │   └── useAgoraConnection.ts  # Agora RTC/RTM connection hook
 │   │   ├── services/             # Core business logic
-│   │   │   ├── agora-service.ts  # Agora SDK integration
 │   │   │   └── api.ts            # Backend API client
 │   │   ├── conversational-ai-api/ # AI agent SDK wrapper
 │   │   │   ├── index.ts          # Main API interface
@@ -52,14 +53,14 @@ A real-time voice conversation application with AI agents, built with:
 ### Key Components
 
 **Frontend (`web-client/`)**:
-- `agora-service.ts`: Manages RTC/RTM connections, audio streaming
+- `useAgoraConnection.ts`: React hook managing RTC/RTM connections using agora-rtc-react
 - `conversational-ai-api/`: Wraps Agora Conversational AI SDK
 - `app-store.ts`: Global state (connection status, logs, subtitles)
 - Components: UI layer, subscribes to store updates
 
 **Backend (`server-python/`)**:
 - `server.py`: REST API for token generation and agent control
-- `agent.py`: Manages AI agent lifecycle (start/stop/update)
+- `agent.py`: Manages AI agent lifecycle using AgoraAgent wrapper
 
 ### Data Flow
 
@@ -76,7 +77,7 @@ A real-time voice conversation application with AI agents, built with:
 ### When Modifying Frontend
 
 - **UI changes**: Edit components in `src/components/`
-- **SDK integration**: Modify `src/services/agora-service.ts`
+- **SDK integration**: Modify `src/hooks/useAgoraConnection.ts`
 - **State management**: Update `src/stores/app-store.ts`
 - **API calls**: Extend `src/services/api.ts`
 - **Types**: Add to `src/conversational-ai-api/type.ts`
@@ -91,17 +92,36 @@ A real-time voice conversation application with AI agents, built with:
 
 - Package location: `server-python/agora-agent-rest` (do not modify this directory)
 - Client entry: `from agoraio import Agora`
-- Auth: `Agora(username="YOUR_USERNAME", password="YOUR_PASSWORD")`
-- Start agent: `client.agents.start(appid, name, properties=StartAgentsRequestProperties(...))`
-- List agents: `client.agents.list(appid=..., channel=..., state=..., limit=..., cursor=...)`
-- Get agent: `client.agents.get(appid=..., agent_id=...)`
-- Get history: `client.agents.get_history(appid=..., agent_id=...)`
+- Wrapper imports: `from agoraio.wrapper import Agent as AgoraAgent`
+- Vendor imports: `from agoraio.wrapper.vendors import OpenAI, ElevenLabsTTS, DeepgramSTT`
+
+**Agent creation pattern:**
+```python
+agora_agent = AgoraAgent(
+    name="agent_name",
+    instructions="System prompt",
+    greeting="Hello message",
+    advanced_features={"enable_rtm": True},
+    parameters={"data_channel": "rtm"}
+)
+
+agora_agent = (
+    agora_agent
+    .with_llm(OpenAI(api_key=key, model="gpt-4o-mini"))
+    .with_tts(ElevenLabsTTS(key=key, voice_id=id))
+    .with_stt(DeepgramSTT(api_key=key, language="en-US"))
+)
+
+session = agora_agent.create_session(client=client, channel=channel, ...)
+agent_id = session.start()
+```
 
 ### Backend Replacement Plan (server-python/src only)
 
-- Replace `agora_rest.agent` usage with local `agora-agent-rest` SDK usage in `src/agent.py`
-- Replace token generation in `src/server.py` with local `src/agora_token_builder`
-- Keep request/response shapes for `/get_config`, `/v2/startAgent`, `/v2/stopAgent` unchanged
+✅ Completed:
+- Replaced `agora_rest.agent` usage with local `agora-agent-rest` SDK using AgoraAgent wrapper
+- Replaced token generation with `agoraio.wrapper.token.generate_rtc_token`
+- Request/response shapes for `/get_config`, `/v2/startAgent`, `/v2/stopAgent` unchanged
 
 ### Testing Changes
 
@@ -122,13 +142,13 @@ bun run build
 ### Common Tasks
 
 **Add new agent configuration**:
-1. Update `agent.py` with new parameters
+1. Update `agent.py` with new parameters (use AgoraAgent wrapper methods)
 2. Add endpoint in `server.py`
 3. Update frontend API client in `api.ts`
-4. Add UI controls in `ControlBar.tsx`
+4. Add UI controls in `control-bar.tsx`
 
 **Add new UI feature**:
-1. Create component in `src/components/`
+1. Create component in `src/components/` (use lowercase kebab-case filenames)
 2. Add state to `app-store.ts` if needed
 3. Subscribe to store in component
 4. Update types in `type.ts`
@@ -145,7 +165,7 @@ bun run build
 - Frontend uses Next.js dev server (port 3000)
 - Backend uses uvicorn (port 8000)
 - API requests are proxied from `/api/*` to backend via `proxy.ts` (Next.js 16 convention)
-- All Agora SDK calls go through `agora-service.ts`
+- All Agora SDK calls go through `src/hooks/useAgoraConnection.ts`
 - State updates trigger React re-renders automatically
 - Agent lifecycle is managed by backend, not frontend
 

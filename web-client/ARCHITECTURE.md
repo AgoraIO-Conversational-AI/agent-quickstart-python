@@ -12,12 +12,12 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 
 | Category | Technology |
 |----------|------------|
-| Framework | React 18 |
+| Framework | Next.js 16 + React 19 |
 | Language | TypeScript |
-| Build Tool | Vite |
+| Build Tool | Turbopack |
 | Styling | Tailwind CSS |
 | State Management | Zustand |
-| RTC SDK | agora-rtc-sdk-ng |
+| RTC SDK | agora-rtc-react |
 | RTM SDK | agora-rtm |
 
 ### Backend
@@ -33,17 +33,22 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 
 ```
 .
+├── app/                     # Next.js App Router
+│   ├── layout.tsx           # Root layout
+│   ├── page.tsx             # Home page (loads AgoraProvider + App)
+│   └── globals.css          # Global styles
 ├── src/                     # Frontend source
 │   ├── components/          # UI components
-│   │   ├── App.tsx          # Main application entry
-│   │   ├── SubtitlePanel.tsx    # Subtitle rendering module
-│   │   ├── LogPanel.tsx         # Log display module
-│   │   └── ControlBar.tsx       # Control buttons (start/stop/mic)
+│   │   ├── app.tsx          # Main application entry
+│   │   ├── subtitle-panel.tsx   # Subtitle rendering module
+│   │   ├── log-panel.tsx        # Log display module
+│   │   └── control-bar.tsx      # Control buttons (start/stop/mic)
+│   ├── hooks/               # React hooks
+│   │   └── useAgoraConnection.ts # RTC/RTM connection hook
 │   ├── stores/              # State management
 │   │   └── app-store.ts     # Zustand store
 │   ├── services/            # Service layer
-│   │   ├── api.ts           # Backend API calls (get_config, startAgent, stopAgent)
-│   │   └── agora-service.ts # RTC/RTM integration
+│   │   └── api.ts           # Backend API calls (get_config, startAgent, stopAgent)
 │   ├── conversational-ai-api/   # Subtitle rendering core module
 │   │   ├── index.ts
 │   │   ├── type.ts
@@ -51,18 +56,18 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 │   ├── lib/                 # Utility libraries
 │   │   ├── logger.ts        # Logger utility
 │   │   └── utils.ts         # Common utility functions
-│   ├── config/
-│   │   └── env.ts           # Environment configuration
-│   └── main.tsx             # Application entry point
+│   └── config/
+│       └── env.ts           # Environment configuration
 │
+├── proxy.ts                 # Next.js 16 API proxy (replaces middleware)
 ├── ../server-python/        # Backend service (project root level)
 │   ├── src/
 │   │   ├── server.py        # FastAPI entry, route definitions
-│   │   └── agent.py         # Agent class (generate_config, start, stop)
+│   │   └── agent.py         # Agent class using AgoraAgent wrapper
 │   ├── requirements.txt     # Python dependencies
 │   └── .env.local           # Backend environment variables
 │
-├── vite.config.ts           # Vite configuration (includes API proxy)
+├── next.config.ts           # Next.js configuration
 └── package.json             # Frontend dependencies + scripts
 ```
 
@@ -91,9 +96,11 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 ## Data Flow
 
 ```
-User Action → Zustand Store → Service Layer → Agora SDK
+User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
                    ↓
-              UI Components ← ConversationalAIAPI Events
+              Zustand Store ← ConversationalAIAPI Events
+                   ↓
+              UI Components
 ```
 
 ## API Endpoints
@@ -186,19 +193,14 @@ Backend reads configuration from `server-python/.env.local`:
 
 ### Proxy Configuration
 
-Vite dev server proxies `/api/*` requests to Python backend (port 8000):
+Next.js 16 uses `proxy.ts` to proxy `/api/*` requests to Python backend (port 8000):
 
 ```typescript
-// vite.config.ts
-server: {
-  port: 5173,
-  proxy: {
-    '/api': {
-      target: 'http://localhost:8000',
-      changeOrigin: true,
-      rewrite: (path) => path.replace(/^\/api/, '')
-    }
-  }
+// proxy.ts
+export function GET(request: NextRequest) {
+  const url = new URL(request.url)
+  const backendUrl = `http://localhost:8000${url.pathname.replace('/api', '')}`
+  return fetch(backendUrl, { headers: request.headers })
 }
 ```
 
@@ -229,9 +231,10 @@ interface AppState {
 ## Event Flow
 
 1. User clicks connect → Call `/api/get_config` to get configuration
-2. Initialize RTC/RTM Engine
-3. Use returned token to login RTM → Join RTC channel
-4. Initialize ConversationalAIAPI
-5. Call `/api/v2/startAgent` to start Agent
-6. Listen to subtitle events → Update UI
-7. User clicks stop → Call `/api/v2/stopAgent` → Cleanup resources
+2. AgoraRTCProvider creates RTC client
+3. useAgoraConnection hook manages connection via useJoin, usePublish hooks
+4. Use returned token to login RTM → Join RTC channel
+5. Initialize ConversationalAIAPI
+6. Call `/api/v2/startAgent` to start Agent
+7. Listen to subtitle events → Update Zustand store → UI re-renders
+8. User clicks stop → Call `/api/v2/stopAgent` → Cleanup resources
