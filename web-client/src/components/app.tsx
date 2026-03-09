@@ -1,27 +1,28 @@
-import { ControlBar } from '@/components/ControlBar'
-import { LogPanel } from '@/components/LogPanel'
-import { SubtitlePanel } from '@/components/SubtitlePanel'
+import { ControlBar } from '@/components/control-bar'
+import { LogPanel } from '@/components/log-panel'
+import { SubtitlePanel } from '@/components/subtitle-panel'
 import { cn } from '@/lib/utils'
-import { agoraService } from '@/services/agora-service'
+import { useAgoraConnection } from '@/hooks/useAgoraConnection'
 import { useAppStore } from '@/stores/app-store'
 
 export default function App() {
   const isConnected = useAppStore((s) => s.isConnected)
   const isConnecting = useAppStore((s) => s.isConnecting)
+  const { connect, disconnect, toggleMicrophone } = useAgoraConnection()
 
   const handleStartAgent = async () => {
     if (isConnecting) return
     try {
-      await agoraService.connect()
-    } catch {}
+      await connect()
+    } catch { }
   }
 
   const handleStopAgent = async () => {
-    await agoraService.disconnect()
+    await disconnect()
   }
 
   const handleToggleMic = () => {
-    agoraService.toggleMicrophone()
+    toggleMicrophone()
   }
 
   return (

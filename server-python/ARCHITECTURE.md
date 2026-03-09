@@ -16,7 +16,7 @@ Python FastAPI service providing REST APIs for Agora Conversational AI Agent man
 | Framework | FastAPI |
 | Language | Python 3.8+ |
 | HTTP Server | Uvicorn |
-| SDK | agora-rest-client-python |
+| SDK | agora-agent-rest (Local) |
 | Config | python-dotenv |
 
 ## Project Structure
@@ -25,7 +25,9 @@ Python FastAPI service providing REST APIs for Agora Conversational AI Agent man
 server-python/
 ├── src/
 │   ├── server.py           # FastAPI app, routes, CORS
-│   └── agent.py            # Agent lifecycle management
+│   ├── agent.py            # Agent lifecycle management
+│   └── agora_token_builder/ # Token generation utils
+├── agora-agent-rest/       # Local SDK source code
 ├── .env.example            # Environment template
 └── requirements.txt        # Python dependencies
 ```
@@ -65,8 +67,8 @@ agent = Agent()
 ### 2. agent.py - Agent Management Layer
 
 **Responsibilities**:
-- Wrap Agora REST SDK client
-- Configure ASR/LLM/TTS providers
+- Wrap Agora Agent REST SDK (local version)
+- Configure ASR/LLM/TTS providers using `agoraio` models
 - Manage agent lifecycle (start/stop)
 - Parameter validation
 
@@ -75,21 +77,30 @@ agent = Agent()
 ```python
 class Agent:
     def __init__(self):
-        # Initialize AgentClient with credentials
-        self.client = AgentClient(app_id, app_certificate, api_key, api_secret)
+        # Generate Token007 for API authentication
+        token = generate_access_token(
+            app_id=self.app_id,
+            app_certificate=self.app_certificate,
+            expiry_seconds=86400
+        )
+        
+        # Pass token via Authorization header
+        headers = {"Authorization": f"agora token={token}"}
+        self.client = Agora(area=Area.CN, username="", password="", headers=headers)
     
     def start(channel_name, agent_uid, user_uid):
-        # Configure three-tier AI services
-        asr = DeepgramASRConfig(api_key)
-        llm = OpenAILLMConfig(api_key)
-        tts = ElevenLabsTTSConfig(api_key)
+        # Configure agent using AgoraAgent wrapper
+        agora_agent = AgoraAgent(...)
+        agora_agent = (
+            agora_agent
+            .with_llm(OpenAI(...))
+            .with_tts(ElevenLabsTTS(...))
+            .with_stt(DeepgramSTT(...))
+        )
         
-        # Start agent via REST API
-        return self.client.start_agent(...)
-    
-    def stop(agent_id):
-        # Stop agent via REST API
-        self.client.stop_agent(agent_id)
+        # Start agent via SDK
+        session = agora_agent.create_session(...)
+        return session.start()
 ```
 
 ## API Endpoints
@@ -185,8 +196,6 @@ Loaded from `.env.local` (priority) or `.env`:
 ```bash
 APP_ID=your_app_id                    # Agora App ID
 APP_CERTIFICATE=your_app_certificate  # Agora App Certificate
-API_KEY=your_api_key                  # Agora REST API Key
-API_SECRET=your_api_secret            # Agora REST API Secret
 ```
 
 **AI Service Providers**:
@@ -201,17 +210,21 @@ TTS_ELEVENLABS_API_KEY=your_key      # Text-to-Speech
 PORT=8000                             # HTTP server port
 ```
 
+**Note**: The service uses Token007 authentication generated from `APP_ID` and `APP_CERTIFICATE`. No API_KEY/API_SECRET needed.
+
 ### Token Generation
 
-Uses `agora_rest.agent.TokenBuilder`:
+Uses `agora_token_builder.RtcTokenBuilder`:
 
 ```python
-token = TokenBuilder.generate(
+token = RtcTokenBuilder.build_token_with_rtm(
     app_id=app_id,
     app_certificate=app_certificate,
     channel_name=channel_name,
-    uid=str(user_uid),
-    expire=86400  # 24 hours
+    account=str(user_uid),
+    role=Role_Publisher,
+    token_expire=86400,
+    privilege_expire=86400
 )
 ```
 

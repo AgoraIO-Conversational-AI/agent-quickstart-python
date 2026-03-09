@@ -8,134 +8,85 @@ A real-time voice conversation application with AI agents, built with:
 - **Frontend**: Next.js + React + TypeScript + Agora Web SDK
 - **Backend**: Python FastAPI + Agora Conversational AI API
 
-## Architecture
-
-### Module Structure
+## Project Structure
 
 ```
 .
-├── web-client/                    # Frontend application
-│   ├── src/
-│   │   ├── components/           # React UI components
-│   │   │   ├── App.tsx           # Main app container
-│   │   │   ├── ControlBar.tsx    # Call controls (start/stop)
-│   │   │   ├── SubtitlePanel.tsx # Live transcription display
-│   │   │   └── LogPanel.tsx      # Event log viewer
-│   │   ├── services/             # Core business logic
-│   │   │   ├── agora-service.ts  # Agora SDK integration
-│   │   │   └── api.ts            # Backend API client
-│   │   ├── conversational-ai-api/ # AI agent SDK wrapper
-│   │   │   ├── index.ts          # Main API interface
-│   │   │   ├── type.ts           # TypeScript types
-│   │   │   └── utils/            # Event handling & rendering
-│   │   ├── stores/               # State management
-│   │   │   └── app-store.ts      # Zustand store
-│   │   └── lib/                  # Utilities
-│   │       ├── logger.ts         # Logging utility
-│   │       └── utils.ts          # Helper functions
-│   └── .claude/                  # AI skill documents
-│
-├── server-python/                 # Backend service
-│   └── src/
-│       ├── server.py             # FastAPI app & endpoints
-│       └── agent.py              # Agora AI agent management
-│
-└── recipes/                       # Platform-specific examples
-    └── Conversational-AI-Starter/
-        ├── android-kotlin/
-        ├── ios-swift/
-        ├── flutter/
-        ├── reactnative/
-        └── ...
+├── web-client/           # Frontend application (Next.js + React)
+├── server-python/        # Backend service (FastAPI + Agora SDK)
+└── recipes/              # Platform-specific examples (Android, iOS, Flutter, etc.)
 ```
 
-### Key Components
-
-**Frontend (`web-client/`)**:
-- `agora-service.ts`: Manages RTC/RTM connections, audio streaming
-- `conversational-ai-api/`: Wraps Agora Conversational AI SDK
-- `app-store.ts`: Global state (connection status, logs, subtitles)
-- Components: UI layer, subscribes to store updates
-
-**Backend (`server-python/`)**:
-- `server.py`: REST API for token generation and agent control
-- `agent.py`: Manages AI agent lifecycle (start/stop/update)
-
-### Data Flow
-
-1. User clicks "Start" → Frontend requests token from backend
-2. Backend generates RTC/RTM tokens → Returns to frontend
-3. Frontend joins Agora channel with tokens
-4. Frontend starts AI agent via backend API
-5. Agent joins channel, begins conversation
-6. Audio/transcription flows through Agora RTM
-7. Frontend displays live subtitles and logs
-
-## Development Guidelines
-
-### When Modifying Frontend
-
-- **UI changes**: Edit components in `src/components/`
-- **SDK integration**: Modify `src/services/agora-service.ts`
-- **State management**: Update `src/stores/app-store.ts`
-- **API calls**: Extend `src/services/api.ts`
-- **Types**: Add to `src/conversational-ai-api/type.ts`
-
-### When Modifying Backend
-
-- **Endpoints**: Add routes in `src/server.py`
-- **Agent logic**: Update `src/agent.py`
-- **Configuration**: Modify `.env.local` (never commit this file)
-
-### Testing Changes
+## Quick Start
 
 ```bash
-# Start dev environment
+# Start both frontend and backend
 bun run dev
 
-# Frontend only (faster iteration)
+# Frontend only (port 3000)
 bun run frontend
 
-# Backend only
+# Backend only (port 8000)
 bun run backend
-
-# Build production
-bun run build
 ```
 
-### Common Tasks
+## Module-Specific Guides
 
-**Add new agent configuration**:
-1. Update `agent.py` with new parameters
-2. Add endpoint in `server.py`
-3. Update frontend API client in `api.ts`
-4. Add UI controls in `ControlBar.tsx`
+For detailed information about each module, refer to their specific documentation:
 
-**Add new UI feature**:
-1. Create component in `src/components/`
-2. Add state to `app-store.ts` if needed
-3. Subscribe to store in component
-4. Update types in `type.ts`
+### Frontend (web-client/)
+- **[web-client/AGENTS.md](./web-client/AGENTS.md)** - AI assistant guide for frontend development
+- **[web-client/ARCHITECTURE.md](./web-client/ARCHITECTURE.md)** - Detailed frontend architecture
+- **[web-client/.claude/](./web-client/.claude/)** - AI skill documents for specific modules
 
-**Debug connection issues**:
-1. Check logs in `LogPanel` component
-2. Verify tokens in backend logs
-3. Inspect network tab for API calls
-4. Check Agora console for channel activity
+### Backend (server-python/)
+- **[server-python/AGENTS.md](./server-python/AGENTS.md)** - AI assistant guide for backend development
+- **[server-python/README.md](./server-python/README.md)** - Backend API documentation
+- **[server-python/ARCHITECTURE.md](./server-python/ARCHITECTURE.md)** - Backend architecture details
+- **[server-python/MIGRATION_TOKEN007.md](./server-python/MIGRATION_TOKEN007.md)** - Token007 migration guide
+
+### System Architecture
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Overall system architecture and data flow
+
+## Key Technologies
+
+- **Frontend**: Next.js 16, React, TypeScript, Agora Web SDK, Zustand
+- **Backend**: Python 3.8+, FastAPI, agora-agent-rest SDK, uvicorn
+- **Authentication**: Token007 (AccessToken2) for Agora API
+- **Real-time**: Agora RTC (audio) + RTM (messaging/transcription)
+
+## Common Development Tasks
+
+### Working on Frontend
+See [web-client/AGENTS.md](./web-client/AGENTS.md) for:
+- UI component development
+- State management patterns
+- Agora SDK integration
+- API client usage
+
+### Working on Backend
+See [server-python/AGENTS.md](./server-python/AGENTS.md) for:
+- API endpoint development
+- Agent lifecycle management
+- Token generation
+- Configuration patterns
+
+### Cross-Module Changes
+1. Review [ARCHITECTURE.md](./ARCHITECTURE.md) for system overview
+2. Check both module-specific AGENTS.md files
+3. Test integration between frontend and backend
+4. Verify token flow and API contracts
 
 ## Important Notes
 
 - Never commit `.env.local` or credentials
-- Frontend uses Next.js dev server (port 3000)
-- Backend uses uvicorn (port 8000)
-- API requests are proxied from `/api/*` to backend via `proxy.ts` (Next.js 16 convention)
-- All Agora SDK calls go through `agora-service.ts`
-- State updates trigger React re-renders automatically
+- Frontend proxies `/api/*` requests to backend
 - Agent lifecycle is managed by backend, not frontend
+- All Agora SDK calls go through `useAgoraConnection.ts` hook
+- Use Token007 authentication (API_KEY/API_SECRET no longer needed)
 
 ## Reference Documentation
 
-- [web-client/ARCHITECTURE.md](./web-client/ARCHITECTURE.md) - Detailed frontend architecture
-- [web-client/.claude/](./web-client/.claude/) - AI skill documents for specific modules
-- [server-python/README.md](./server-python/README.md) - Backend API documentation
 - [Agora Docs](https://docs.agora.io/) - Official SDK documentation
+- [Next.js Docs](https://nextjs.org/docs) - Frontend framework
+- [FastAPI Docs](https://fastapi.tiangolo.com/) - Backend framework

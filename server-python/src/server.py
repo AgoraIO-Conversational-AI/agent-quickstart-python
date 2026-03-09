@@ -20,7 +20,7 @@ load_dotenv(os.path.join(_base_dir, '.env'))
 from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from agora_rest.agent import TokenBuilder
+from agora_agent.agentkit.token import generate_convo_ai_token
 from agent import Agent
 
 def _to_http_error(exc: Exception) -> HTTPException:
@@ -92,13 +92,13 @@ def get_config():
         app_id = os.getenv("APP_ID")
         app_certificate = os.getenv("APP_CERTIFICATE")
         
-        # Generate token using TokenBuilder
-        token = TokenBuilder.generate(
+        # Generate convo AI token (RTC + RTM)
+        token = generate_convo_ai_token(
             app_id=app_id,
             app_certificate=app_certificate,
             channel_name=channel_name,
-            uid=str(user_uid),
-            expire=86400  # 24 hours
+            account=str(user_uid),
+            token_expire=86400,
         )
         
         config_data = {

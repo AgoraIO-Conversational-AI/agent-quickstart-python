@@ -12,13 +12,13 @@ cp .env.example .env.local
 ```
 
 Edit `.env.local` and fill in your API keys:
-- `APP_ID` - Your Agora App ID
-- `APP_CERTIFICATE` - Your Agora App Certificate
-- `API_KEY` - Your Agora API Key
-- `API_SECRET` - Your Agora API Secret
-- `LLM_API_KEY` - Your OpenAI API Key
-- `TTS_ELEVENLABS_API_KEY` - Your ElevenLabs API Key
-- `ASR_DEEPGRAM_API_KEY` - Your Deepgram API Key
+- `APP_ID` - Your Agora App ID (Required)
+- `APP_CERTIFICATE` - Your Agora App Certificate (Required)
+- `LLM_API_KEY` - Your OpenAI API Key (Required)
+- `TTS_ELEVENLABS_API_KEY` - Your ElevenLabs API Key (Required)
+- `ASR_DEEPGRAM_API_KEY` - Your Deepgram API Key (Required)
+
+**Note**: `API_KEY` and `API_SECRET` are no longer required. The service now uses Token007 authentication generated from `APP_ID` and `APP_CERTIFICATE`. If you prefer to use Basic Auth (legacy), you can still set `API_KEY` and `API_SECRET`.
 
 ### 2. Install Dependencies
 
@@ -85,6 +85,7 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 
 ## SDK
 
-This project uses the `agora-rest-client-python` SDK:
-- PyPI: https://pypi.org/project/agora-rest-client-python/
-- Install: `pip install agora-rest-client-python`
+This project uses the local `agora-agent-rest` SDK with high-level wrapper:
+- Location: `./agora-agent-rest/`
+- Wrapper: `agoraio.wrapper.Agent` for fluent agent configuration
+- Vendors: `OpenAI`, `ElevenLabsTTS`, `DeepgramSTT` for LLM/TTS/STT
