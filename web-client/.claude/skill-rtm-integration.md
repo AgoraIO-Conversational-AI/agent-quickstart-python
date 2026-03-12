@@ -15,9 +15,8 @@ bun add agora-rtm
 | RTMClient | RTM client instance |
 | MessageEvent | Message event |
 | PresenceEvent | Presence event (Agent state changes) |
-| ChannelType | Channel type (MESSAGE/USER) |
 
-## Standard Implementation Flow
+## Implementation Flow
 
 ### 1. Initialize RTM Client
 
@@ -30,7 +29,7 @@ const rtmClient = new AgoraRTM.RTM(appId, String(uid))
 ### 2. Login
 
 ```typescript
-// token obtained from backend /api/token (types includes 2)
+// token obtained from backend /api/get_config
 try {
   await rtmClient.login({ token })
 } catch (e) {
@@ -49,72 +48,32 @@ try {
 await rtmClient.subscribe(channelName)
 ```
 
-### 4. Event Listeners
+### 4. Pass to AgoraVoiceAI
+
+RTM message handling is managed by `AgoraVoiceAI` from `agent-client-toolkit-ts`.
+After RTM login and subscribe, pass the RTM client to AgoraVoiceAI:
 
 ```typescript
-import type { RTMEvents } from 'agora-rtm'
+import { AgoraVoiceAI } from 'agent-client-toolkit-ts'
 
-// Message event (subtitle data)
-rtmClient.addEventListener('message', (event: RTMEvents.MessageEvent) => {
-  const messageData = event.message
-  
-  if (typeof messageData === 'string') {
-    const parsed = JSON.parse(messageData)
-    // Handle message
-  } else if (messageData instanceof Uint8Array) {
-    const decoder = new TextDecoder('utf-8')
-    const parsed = JSON.parse(decoder.decode(messageData))
-    // Handle message
-  }
+const voiceAI = await AgoraVoiceAI.init({
+  rtcEngine: rtcClient,
+  rtmConfig: { rtmEngine: rtmClient },
+  enableLog: true,
 })
-
-// Presence event (Agent state)
-rtmClient.addEventListener('presence', (event: RTMEvents.PresenceEvent) => {
-  const stateChanged = event.stateChanged as {
-    state?: string
-    turn_id?: string
-  }
-  
-  if (stateChanged?.state && stateChanged?.turn_id) {
-    // Agent state change: idle/listening/thinking/speaking
-  }
-})
-
-// Connection status
-rtmClient.addEventListener('status', (event) => {
-  // Handle connection state change
-})
+voiceAI.subscribeMessage(channelName)
 ```
 
-### 5. Send Messages (User Input)
+AgoraVoiceAI handles all RTM message parsing (subtitles, agent state, errors)
+and emits typed events via `AgoraVoiceAIEvents`.
 
-```typescript
-// Send text message to Agent
-await rtmClient.publish(agentUserId, JSON.stringify({
-  priority: 'interrupted',  // interrupted/append/ignore
-  interruptable: true,
-  message: 'Hello',
-}), {
-  channelType: 'USER',
-  customType: 'user.transcription',
-})
-
-// Send interrupt message
-await rtmClient.publish(agentUserId, JSON.stringify({
-  customType: 'message.interrupt',
-}), {
-  channelType: 'USER',
-  customType: 'message.interrupt',
-})
-```
-
-### 6. Logout
+### 5. Logout
 
 ```typescript
 await rtmClient.logout()
 ```
 
-## Message Types
+## Message Types (handled by AgoraVoiceAI internally)
 
 | Type | Description |
 |------|-------------|
@@ -134,20 +93,13 @@ await rtmClient.logout()
 | `speaking` | Speaking |
 | `silent` | Silent |
 
-## Type Definitions
-
-```typescript
-import type { RTMClient, RTMEvents, ChannelType } from 'agora-rtm'
-```
-
 ## Important Notes
 
-1. RTM login may return error code -10017 indicating already logged in, needs special handling
-2. Messages can be string or Uint8Array, need to handle separately
-3. Presence events are used to monitor Agent state changes
-4. When sending messages, channelType 'USER' indicates peer-to-peer message
+1. RTM login may return error code -10017 indicating already logged in
+2. RTM is used as the data channel (`"data_channel": "rtm"` in backend config)
+3. All RTM message parsing is handled by `AgoraVoiceAI` — no manual parsing needed
+4. RTM must be initialized before `AgoraVoiceAI.init()`
 
 ## Reference Files
 
-- `src/services/agora-service.ts` - Complete implementation example
-- `src/conversational-ai-api/type.ts` - Message type definitions
+- `src/hooks/useAgoraConnection.ts` - RTM init + AgoraVoiceAI integration

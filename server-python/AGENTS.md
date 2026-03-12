@@ -9,19 +9,17 @@ This document is designed for AI programming assistants to understand and work w
 **Tech Stack:**
 - Python 3.8+
 - FastAPI (web framework)
-- agora-agent-rest (Local Agora SDK)
+- agent-server-sdk-python (Agora Agent SDK)
 - uvicorn (ASGI server)
 
 **Architecture:**
 ```
-HTTP Request → FastAPI (server.py) → Agent (agent.py) → Agora Agent REST (Local SDK) → Agora API
+HTTP Request → FastAPI (server.py) → Agent (agent.py) → agent-server-sdk-python → Agora API
 ```
 
 **Key Components:**
 - `src/server.py` - HTTP endpoints and request handling
-- `src/agent.py` - Business logic wrapper around local SDK
-- `src/agora_token_builder/` - Token generation logic
-- `agora-agent-rest/` - Local Python client for Agora Agents
+- `src/agent.py` - Business logic wrapper around SDK
 - SDK handles token generation, API calls, and configuration
 
 ## Build and Test Commands
@@ -32,7 +30,7 @@ HTTP Request → FastAPI (server.py) → Agent (agent.py) → Agora Agent REST (
 cp .env.example .env.local
 # Edit .env.local with actual API keys
 
-# Install dependencies (includes local agora-agent-rest)
+# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -82,58 +80,6 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 - Keep docstrings concise and natural
 - Avoid obvious comments
 - Focus on "why" not "what"
-- No AI-generated style comments (e.g., "This function does X")
-
-### Code Organization
-```python
-# Good
-def start_agent(channel: str, uid: str) -> dict:
-    """Start agent in channel"""
-    if not channel:
-        raise ValueError("channel is required")
-    return manager.start(channel, uid)
-
-# Avoid
-def start_agent(channel: str, uid: str) -> dict:
-    """
-    Start Conversational AI Agent in a channel
-    
-    Args:
-        channel: The channel name for the agent
-        uid: The user ID for the agent
-        
-    Returns:
-        Dictionary containing agent information
-    """
-    # Validate channel parameter
-    if not channel:
-        # Raise error if channel is empty
-        raise ValueError("channel is required")
-    # Call manager to start agent
-    return manager.start(channel, uid)
-```
-
-## Testing Instructions
-
-### Manual Testing
-1. Start service: `python src/server.py`
-2. Test each endpoint with curl commands (see above)
-3. Verify response format matches expected structure
-
-### Expected Responses
-```python
-# Success
-{"code": 0, "msg": "success", "data": {...}}
-
-# Error (FastAPI)
-{"detail": "Error message"}
-```
-
-### Common Test Scenarios
-- Missing environment variables → 500 error on startup
-- Invalid parameters → 400 error
-- Agent not found → 404 error
-- API call failure → 500 error
 
 ## Security Considerations
 
@@ -144,29 +90,17 @@ def start_agent(channel: str, uid: str) -> dict:
 
 ### API Keys Required
 - `APP_ID`, `APP_CERTIFICATE` - Agora credentials (required)
-- `LLM_API_KEY` - OpenAI API key (required)
+- `LLM_API_KEY` - LLM API key (required)
 - `TTS_ELEVENLABS_API_KEY` - ElevenLabs API key (required)
 - `ASR_DEEPGRAM_API_KEY` - Deepgram API key (required)
-
-### Input Validation
-- All user inputs are validated before processing
-- Empty strings are rejected with `ValueError`
-- Type validation handled by Pydantic models
-
-### Error Handling
-- Exceptions are caught and converted to appropriate HTTP errors
-- Sensitive information is not exposed in error messages
-- Use generic error messages for production
 
 ## Project Structure
 
 ```
-python-agent/
+server-python/
 ├── src/
 │   ├── server.py          # FastAPI app, HTTP endpoints
-│   ├── agent.py           # Business logic wrapper
-│   └── agora_token_builder/ # Token generation utils
-├── agora-agent-rest/      # Local SDK source code
+│   └── agent.py           # Agent lifecycle management
 ├── .env.example           # Environment template (safe to commit)
 ├── .env.local             # Actual secrets (never commit)
 ├── requirements.txt       # Python dependencies
@@ -176,12 +110,41 @@ python-agent/
 
 ## Common Patterns
 
-### Adding New Endpoint
-1. Define Pydantic model for request body
-2. Add route handler function
-3. Validate inputs
-4. Call agent method
-5. Return standardized response format
+### Agent Configuration Pattern
+```python
+from agora_agent import Agora, Area
+from agora_agent.agentkit import Agent as AgoraAgent
+from agora_agent.agentkit.vendors import OpenAI, ElevenLabsTTS, DeepgramSTT
+
+# Create Agora client (Token007 auth from APP_ID + APP_CERTIFICATE)
+client = Agora(area=Area.CN, app_id=app_id, app_certificate=app_certificate)
+
+# Create agent with fluent API
+agora_agent = AgoraAgent(
+    name="agent_name",
+    instructions="System prompt",
+    greeting="Hello message",
+    advanced_features={"enable_rtm": True},
+    parameters={"data_channel": "rtm", "enable_error_message": True},
+)
+
+agora_agent = (
+    agora_agent
+    .with_llm(OpenAI(api_key=key, model="gpt-4o-mini"))
+    .with_tts(ElevenLabsTTS(key=key, voice_id=voice_id, model_id=model_id))
+    .with_stt(DeepgramSTT(api_key=key, language="en-US"))
+)
+
+session = agora_agent.create_session(
+    client=client,
+    channel=channel,
+    agent_uid=agent_uid,
+    remote_uids=["*"],          # Subscribe all users
+    enable_string_uid=True,
+    idle_timeout=120,
+)
+agent_id = session.start()
+```
 
 ### Error Handling Pattern
 ```python
@@ -194,34 +157,17 @@ except RuntimeError as e:
     raise HTTPException(status_code=500, detail=str(e))
 ```
 
-### Configuration Pattern
+### Token Generation
 ```python
-from agoraio.wrapper import Agent as AgoraAgent
-from agoraio.wrapper.vendors import OpenAI, ElevenLabsTTS, DeepgramSTT
+from agora_agent.agentkit.token import generate_convo_ai_token
 
-# Create agent with fluent API
-agora_agent = AgoraAgent(
-    name="agent_name",
-    instructions="System prompt",
-    greeting="Hello message",
-    advanced_features={"enable_rtm": True},
-    parameters={"data_channel": "rtm"}
+token = generate_convo_ai_token(
+    app_id=app_id,
+    app_certificate=app_certificate,
+    channel_name=channel_name,
+    account=str(user_uid),
+    token_expire=86400,
 )
-
-agora_agent = (
-    agora_agent
-    .with_llm(OpenAI(api_key=key, model="gpt-4o-mini"))
-    .with_tts(ElevenLabsTTS(key=key, voice_id=voice_id))
-    .with_stt(DeepgramSTT(api_key=key, language="en-US"))
-)
-
-session = agora_agent.create_session(
-    client=client,
-    channel=channel,
-    agent_uid=agent_uid,
-    remote_uids=[user_uid]
-)
-agent_id = session.start()
 ```
 
 ## Dependencies
@@ -229,19 +175,14 @@ agent_id = session.start()
 ### Core
 - `fastapi>=0.100.0` - Web framework
 - `uvicorn>=0.20.0` - ASGI server
-- `agora-agent-rest` - Local Agora SDK
+- `agent-server-sdk-python` - Agora Agent SDK
 - `python-dotenv>=1.0.0` - Environment management
-
-### Update Strategy
-- Check for security updates regularly
-- Test in development before updating production
-- Pin major versions, allow minor/patch updates
 
 ## Troubleshooting
 
 ### Import Errors
-**Symptom:** `ModuleNotFoundError: No module named 'agoraio'`
-**Solution:** Ensure `agora-agent-rest` is in `PYTHONPATH` or `sys.path` (handled in `agent.py`)
+**Symptom:** `ModuleNotFoundError: No module named 'agora_agent'`
+**Solution:** Ensure `agent-server-sdk-python` is installed: `pip install -r requirements.txt`
 
 ### Configuration Errors
 **Symptom:** Service fails to start with ValueError
@@ -250,14 +191,3 @@ agent_id = session.start()
 ### Port Conflicts
 **Symptom:** `address already in use`
 **Solution:** Change `PORT` in `.env.local` or kill existing process with `lsof -ti :8000 | xargs kill -9`
-
-## AI Assistant Tips
-
-When modifying this project:
-1. Maintain consistent error handling patterns
-2. Keep response format standardized
-3. Validate all inputs before processing
-4. Use type hints for all new functions
-5. Follow existing code style (concise, natural comments)
-6. Test changes with curl commands before committing
-7. Never expose API keys in code or logs

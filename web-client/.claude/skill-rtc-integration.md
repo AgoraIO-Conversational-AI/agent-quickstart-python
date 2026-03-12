@@ -1,121 +1,119 @@
 # Skill: RTC Integration
 
-Agora RTC SDK integration guide for real-time audio/video communication.
+Agora RTC SDK integration guide for real-time audio communication, using `agora-rtc-react` hooks.
 
 ## Dependencies
 
 ```bash
-bun add agora-rtc-sdk-ng
+bun add agora-rtc-sdk-ng agora-rtc-react
 ```
 
 ## Core Concepts
 
 | Concept | Description |
 |---------|-------------|
-| IAgoraRTCClient | RTC client instance |
-| IMicrophoneAudioTrack | Local microphone audio track |
-| IAgoraRTCRemoteUser | Remote user |
-| ConnectionState | Connection state |
+| AgoraRTCProvider | React context provider for RTC client |
+| useRTCClient | Access the RTC client instance |
+| useJoin | Declarative channel join hook |
+| usePublish | Declarative track publish hook |
+| useLocalMicrophoneTrack | Create local microphone track |
+| useRemoteUsers | Access remote users |
+| useClientEvent | Listen to RTC client events |
+| useIsConnected | Check RTC connection status |
 
-## Standard Implementation Flow
+## Implementation with agora-rtc-react
 
-### 1. Initialize RTC Client
+### 1. Provider Setup (app/page.tsx)
 
 ```typescript
-import AgoraRTC, { type IAgoraRTCClient } from 'agora-rtc-sdk-ng'
+import AgoraRTC from 'agora-rtc-sdk-ng'
+import { AgoraRTCProvider } from 'agora-rtc-react'
 
-// Enable audio PTS (required for subtitle sync)
-AgoraRTC.setParameter('ENABLE_AUDIO_PTS', true)
+const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' })
 
-// Create client
-const rtcClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' })
+export default function Page() {
+  return (
+    <AgoraRTCProvider client={client}>
+      <App />
+    </AgoraRTCProvider>
+  )
+}
 ```
 
-### 2. Create Local Audio Track
+### 2. Hook-Based Connection (useAgoraConnection.ts)
 
 ```typescript
-const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack({
-  AEC: true,   // Echo cancellation
-  ANS: false,  // Noise suppression (recommend off for conversation)
-  AGC: true,   // Auto gain control
-})
-```
+import {
+  useRTCClient, useLocalMicrophoneTrack, useRemoteUsers,
+  useClientEvent, useIsConnected, useJoin, usePublish,
+} from 'agora-rtc-react'
 
-### 3. Join Channel
-
-```typescript
-// Generate UID (recommend range: 1000-9999999)
-const uid = Math.floor(Math.random() * 9000000) + 1000
-
-// token obtained from backend /api/token
-await rtcClient.join(appId, channelName, token, uid)
-await rtcClient.publish([localAudioTrack])
-```
-
-### 4. Event Listeners
-
-```typescript
-// User joined
-rtcClient.on('user-joined', (user) => {
-  console.log(`User joined: ${user.uid}`)
+// Local microphone track
+const { localMicrophoneTrack } = useLocalMicrophoneTrack(micEnabled && shouldJoin, {
+  AEC: true, ANS: false, AGC: true,
 })
 
-// User published audio
-rtcClient.on('user-published', async (user, mediaType) => {
-  await rtcClient.subscribe(user, mediaType)
-  if (mediaType === 'audio' && user.audioTrack) {
-    user.audioTrack.play()
+// Join channel (declarative — joins when shouldJoin && config are truthy)
+const { isConnected } = useJoin(
+  config ? { appid: config.appId, channel: config.channel, token: config.token, uid: config.uid }
+         : { appid: '', channel: '', token: null, uid: 0 },
+  shouldJoin && !!config
+)
+
+// Publish local track
+usePublish([localMicrophoneTrack])
+```
+
+### 3. Event Listeners
+
+```typescript
+const client = useRTCClient()
+
+// Subscribe to remote user audio
+useClientEvent(client, 'user-published', async (user, mediaType) => {
+  if (mediaType === 'audio') {
+    await client.subscribe(user, mediaType)
+    user.audioTrack?.play()
   }
 })
 
-// Connection state change
-rtcClient.on('connection-state-change', (curState, revState, reason) => {
-  console.log(`RTC state: ${curState}, reason: ${reason}`)
+useClientEvent(client, 'user-joined', (user) => {
+  console.log(`User joined: ${user.uid}`)
 })
 
-// Audio PTS (for subtitle sync)
-rtcClient.on('audio-pts', (pts: number) => {
-  // Pass to ConversationalAIAPI
+useClientEvent(client, 'connection-state-change', (curState, _prevState, reason) => {
+  // Handle connection state changes
 })
 ```
 
-### 5. Microphone Control
+### 4. Microphone Control
 
 ```typescript
-// Mute/unmute
-localAudioTrack.setMuted(true)  // Mute
-localAudioTrack.setMuted(false) // Unmute
+// Mute/unmute via track
+localMicrophoneTrack.setMuted(true)   // Mute
+localMicrophoneTrack.setMuted(false)  // Unmute
 ```
 
-### 6. Leave Channel
+### 5. Disconnect
 
 ```typescript
-// Stop and close local audio track
-localAudioTrack.stop()
-localAudioTrack.close()
+// Stop and close local track
+localMicrophoneTrack.stop()
+localMicrophoneTrack.close()
 
-// Leave channel
-await rtcClient.leave()
-```
-
-## Type Definitions
-
-```typescript
-import type {
-  IAgoraRTCClient,
-  IMicrophoneAudioTrack,
-  IAgoraRTCRemoteUser,
-  ConnectionState,
-  ConnectionDisconnectedReason,
-} from 'agora-rtc-sdk-ng'
+// Set shouldJoin to false → useJoin auto-leaves
+setShouldJoin(false)
+setConfig(null)
 ```
 
 ## Important Notes
 
-1. `ENABLE_AUDIO_PTS` must be set before creating client, required for subtitle sync
-2. User UID range: 1000-9999999, Agent UID range: 10000000-99999999
-3. Must stop/close local audio track before leaving channel
+1. Use `agora-rtc-react` hooks instead of raw SDK calls for React integration
+2. `useJoin` is declarative — set state to control join/leave
+3. `usePublish` auto-publishes when tracks are available
+4. User UID range: 1000-9999999, Agent UID range: 10000000-99999999
 
 ## Reference Files
 
-- `src/services/agora-service.ts` - Complete implementation example
+- `src/hooks/useAgoraConnection.ts` - Complete implementation
+- `app/page.tsx` - AgoraRTCProvider setup

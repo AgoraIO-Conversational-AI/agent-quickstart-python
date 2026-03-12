@@ -1,14 +1,14 @@
 # Agora Conversational AI Skills Overview
 
-This project provides 4 core skills for implementing conversational AI features.
+This project provides 3 core skills for implementing conversational AI features.
 
 ## Skills List
 
 | Skill | File | Keywords | When to Use |
 |-------|------|----------|-------------|
-| RTC Integration | `skill-rtc-integration.md` | `RTC`, `audio`, `microphone`, `join channel`, `publish`, `AgoraRTC` | User asks about audio connection, joining channels, or RTC client setup |
+| RTC Integration | `skill-rtc-integration.md` | `RTC`, `audio`, `microphone`, `join channel`, `publish`, `agora-rtc-react` | User asks about audio connection, joining channels, or RTC client setup |
 | RTM Integration | `skill-rtm-integration.md` | `RTM`, `message`, `subscribe`, `login`, `AgoraRTM` | User asks about messaging, subscribing to channels, or RTM client setup |
-| Conversational AI API | `skill-conversational-ai-api.md` | `subtitle`, `transcript`, `agent state`, `chat`, `interrupt`, `ConversationalAIAPI` | User asks about subtitle rendering, agent state monitoring, or sending messages |
+| AgoraVoiceAI API | `skill-conversational-ai-api.md` | `subtitle`, `transcript`, `agent state`, `AgoraVoiceAI`, `voice AI`, `error` | User asks about subtitle rendering, agent state monitoring, or error handling |
 
 ## Auto-Activation Rules
 
@@ -19,59 +19,41 @@ Examples:
 - "Show agent state" → Auto-load `skill-conversational-ai-api.md`
 - "Subscribe to RTM messages" → Auto-load `skill-rtm-integration.md`
 
-## Usage
-
-Reference skill documents in chat via `@skill-xxx.md` or let auto-activation handle it.
-
 ## Integration Order
 
 ```
-1. Get Token (Backend API: /api/token)
-2. RTC Integration → Join audio channel
-3. RTM Integration → Subscribe message channel
-4. ConversationalAIAPI → Initialize subtitle rendering
+1. Get Config (Backend API: /api/get_config)
+2. RTC Integration → Join audio channel (useJoin + usePublish from agora-rtc-react)
+3. RTM Integration → Login + Subscribe message channel
+4. AgoraVoiceAI → Init + subscribeMessage (from agent-client-toolkit-ts)
 5. Start Agent (Backend API: /api/v2/startAgent)
 ```
 
 ## Complete Connection Flow
 
 ```typescript
-async function connect(channelName: string) {
-  // 1. Generate UIDs
-  const uid = Math.floor(Math.random() * 9000000) + 1000
-  const agentUid = Math.floor(Math.random() * 90000000) + 10000000
+async function connect() {
+  // 1. Get config from backend
+  const config = await getConfig()  // { app_id, token, uid, channel_name, agent_uid }
 
-  // 2. Initialize RTC
-  AgoraRTC.setParameter('ENABLE_AUDIO_PTS', true)
-  const rtcClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' })
+  // 2. RTC Join (managed by agora-rtc-react hooks: useJoin, usePublish)
+  // Set config state → triggers useJoin with appid/channel/token/uid
 
-  // 3. Initialize RTM
-  const rtmClient = new AgoraRTM.RTM(appId, String(uid))
+  // 3. RTM Login + Subscribe
+  const rtmClient = new AgoraRTM.RTM(config.app_id, String(config.uid))
+  await rtmClient.login({ token: config.token })
+  await rtmClient.subscribe(config.channel_name)
 
-  // 4. Get Token
-  const token = await generateToken(channelName, String(uid), 86400, [1, 2])
-
-  // 5. RTM Login
-  await rtmClient.login({ token })
-
-  // 6. RTC Join
-  const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack()
-  await rtcClient.join(appId, channelName, token, uid)
-  await rtcClient.publish([localAudioTrack])
-
-  // 7. RTM Subscribe
-  await rtmClient.subscribe(channelName)
-
-  // 8. Initialize ConvoAI API
-  const convoAIAPI = ConversationalAIAPI.init({
+  // 4. Initialize AgoraVoiceAI (imperative API)
+  const voiceAI = await AgoraVoiceAI.init({
     rtcEngine: rtcClient,
-    rtmEngine: rtmClient,
+    rtmConfig: { rtmEngine: rtmClient },
     enableLog: true,
   })
-  convoAIAPI.subscribeMessage(channelName)
+  voiceAI.subscribeMessage(config.channel_name)
 
-  // 9. Start Agent
-  const agentId = await startAgent(channelName, String(agentUid))
+  // 5. Start Agent
+  const agentId = await startAgent(config.channel_name, String(config.agent_uid), String(config.uid))
 }
 ```
 
@@ -82,17 +64,16 @@ async function disconnect() {
   // 1. Stop Agent
   await stopAgent(channelName, agentId)
 
-  // 2. Cleanup ConvoAI
-  convoAIAPI.unsubscribe()
-  convoAIAPI.removeAllEventListeners()
+  // 2. Cleanup AgoraVoiceAI
+  voiceAI.unsubscribe()
+  voiceAI.destroy()
 
   // 3. RTM Logout
   await rtmClient.logout()
 
-  // 4. RTC Leave
-  localAudioTrack.stop()
-  localAudioTrack.close()
-  await rtcClient.leave()
+  // 4. RTC Leave (managed by agora-rtc-react: setShouldJoin(false))
+  localMicrophoneTrack.stop()
+  localMicrophoneTrack.close()
 }
 ```
 
@@ -100,7 +81,9 @@ async function disconnect() {
 
 | File | Description |
 |------|-------------|
-| `src/services/agora-service.ts` | Complete integration example |
+| `src/hooks/useAgoraConnection.ts` | Complete RTC/RTM/VoiceAI integration |
 | `src/services/api.ts` | Backend API wrapper |
-| `src/conversational-ai-api/` | Subtitle rendering module |
-| `server-python/` | Backend service |
+| `src/stores/app-store.ts` | Zustand store with AgentState/TurnStatus types |
+| `src/components/app.tsx` | Main application component |
+| `src/components/subtitle-panel.tsx` | Transcript rendering |
+| `src/components/control-bar.tsx` | Agent state display + controls |

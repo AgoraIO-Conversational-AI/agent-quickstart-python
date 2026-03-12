@@ -19,6 +19,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 | State Management | Zustand |
 | RTC SDK | agora-rtc-react |
 | RTM SDK | agora-rtm |
+| ConvoAI Toolkit | agent-client-toolkit-ts + agent-client-toolkit-react |
 
 ### Backend
 
@@ -26,8 +27,8 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 |----------|------------|
 | Framework | FastAPI |
 | Language | Python 3 |
-| HTTP Client | requests |
-| Token Builder | agora-token (custom) |
+| Agent SDK | agent-server-sdk-python |
+| Token | agora_agent.agentkit.token (generate_convo_ai_token) |
 
 ## Project Structure
 
@@ -35,8 +36,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 .
 ├── app/                     # Next.js App Router
 │   ├── layout.tsx           # Root layout
-│   ├── page.tsx             # Home page (loads AgoraProvider + App)
-│   └── globals.css          # Global styles
+│   └── page.tsx             # Home page (loads AgoraProvider + App)
 ├── src/                     # Frontend source
 │   ├── components/          # UI components
 │   │   ├── app.tsx          # Main application entry
@@ -44,26 +44,19 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 │   │   ├── log-panel.tsx        # Log display module
 │   │   └── control-bar.tsx      # Control buttons (start/stop/mic)
 │   ├── hooks/               # React hooks
-│   │   └── useAgoraConnection.ts # RTC/RTM connection hook
+│   │   └── useAgoraConnection.ts # RTC/RTM/VoiceAI connection hook
 │   ├── stores/              # State management
 │   │   └── app-store.ts     # Zustand store
 │   ├── services/            # Service layer
 │   │   └── api.ts           # Backend API calls (get_config, startAgent, stopAgent)
-│   ├── conversational-ai-api/   # Subtitle rendering core module
-│   │   ├── index.ts
-│   │   ├── type.ts
-│   │   └── utils/
-│   ├── lib/                 # Utility libraries
-│   │   ├── logger.ts        # Logger utility
-│   │   └── utils.ts         # Common utility functions
-│   └── config/
-│       └── env.ts           # Environment configuration
+│   └── lib/                 # Utility libraries
+│       └── utils.ts         # Common utility functions
 │
 ├── proxy.ts                 # Next.js 16 API proxy (replaces middleware)
 ├── ../server-python/        # Backend service (project root level)
 │   ├── src/
 │   │   ├── server.py        # FastAPI entry, route definitions
-│   │   └── agent.py         # Agent class using AgoraAgent wrapper
+│   │   └── agent.py         # Agent class using agent-server-sdk-python
 │   ├── requirements.txt     # Python dependencies
 │   └── .env.local           # Backend environment variables
 │
@@ -78,7 +71,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 - Real-time display of user and AI Agent conversation
 - Distinct styling for user/agent messages
 - Auto-scroll to latest message
-- Message status display (in-progress/completed/interrupted)
+- Message status display via `TurnStatus` from `agent-client-toolkit-ts`
 
 ### 2. LogPanel (Log Display)
 
@@ -91,14 +84,14 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 
 - Start/Stop Agent button
 - Microphone toggle button
-- Connection status indicator
+- Agent state indicator via `AgentState` from `agent-client-toolkit-ts`
 
 ## Data Flow
 
 ```
 User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
                    ↓
-              Zustand Store ← ConversationalAIAPI Events
+              Zustand Store ← AgoraVoiceAI Events (agent-client-toolkit-ts)
                    ↓
               UI Components
 ```
@@ -172,8 +165,8 @@ User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
 ../server-python/
 ├── src/
 │   ├── server.py        # FastAPI app, routes, CORS
-│   └── agent.py         # Agent 启动/停止逻辑
-└── requirements.txt     # Python 依赖
+│   └── agent.py         # Agent start/stop logic
+└── requirements.txt     # Python dependencies
 ```
 
 ### Environment Variables
@@ -185,7 +178,7 @@ Backend reads configuration from `server-python/.env.local`:
 | APP_ID | Agora App ID |
 | APP_CERTIFICATE | Agora App Certificate |
 | ASR_DEEPGRAM_API_KEY | Deepgram ASR API Key |
-| LLM_API_KEY | OpenAI LLM API Key |
+| LLM_API_KEY | LLM API Key |
 | TTS_ELEVENLABS_API_KEY | ElevenLabs TTS API Key |
 | PORT | Backend server port (default: 8000) |
 
@@ -213,13 +206,13 @@ interface AppState {
   
   // Agent
   agentId: string | null
-  agentState: EAgentState
+  agentState: AgentState        // from agent-client-toolkit-ts
   
   // Audio
   isMicMuted: boolean
   
   // Transcripts
-  transcripts: TranscriptItem[]
+  transcripts: TranscriptItem[] // uses TurnStatus from agent-client-toolkit-ts
   
   // Logs
   logs: LogItem[]
@@ -230,9 +223,10 @@ interface AppState {
 
 1. User clicks connect → Call `/api/get_config` to get configuration
 2. AgoraRTCProvider creates RTC client
-3. useAgoraConnection hook manages connection via useJoin, usePublish hooks
+3. useAgoraConnection hook manages connection via `useJoin`, `usePublish` hooks
 4. Use returned token to login RTM → Join RTC channel
-5. Initialize ConversationalAIAPI
-6. Call `/api/v2/startAgent` to start Agent
-7. Listen to subtitle events → Update Zustand store → UI re-renders
-8. User clicks stop → Call `/api/v2/stopAgent` → Cleanup resources
+5. Initialize `AgoraVoiceAI` from `agent-client-toolkit-ts` (imperative API)
+6. `voiceAI.subscribeMessage(channel)` to listen for subtitle/state events
+7. Call `/api/v2/startAgent` to start Agent
+8. Listen to `AgoraVoiceAIEvents` → Update Zustand store → UI re-renders
+9. User clicks stop → Call `/api/v2/stopAgent` → Cleanup resources

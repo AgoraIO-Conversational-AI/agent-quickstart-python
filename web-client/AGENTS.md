@@ -204,7 +204,10 @@ Next: Start new conversation, type "continue <task name>"
 | PROJECT_STATE.md | Project state record (workflow required) |
 | ARCHITECTURE.md | Technical architecture and data flow |
 | CLAUDE.md | Claude-specific quick reference |
-| .claude/*.md | Agora SDK integration skill documents |
+| .claude/skill-overview.md | Skills overview and connection flow |
+| .claude/skill-rtc-integration.md | RTC integration with agora-rtc-react hooks |
+| .claude/skill-rtm-integration.md | RTM integration guide |
+| .claude/skill-conversational-ai-api.md | AgoraVoiceAI (agent-client-toolkit-ts) integration |
 
 ---
 

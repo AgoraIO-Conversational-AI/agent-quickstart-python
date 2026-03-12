@@ -50,8 +50,8 @@ bun run backend
 
 | Layer | Technologies |
 |-------|-------------|
-| Frontend | Next.js 16, React 19, TypeScript, Agora Web SDK (RTC + RTM), Zustand, Tailwind CSS |
-| Backend | Python 3.8+, FastAPI, agora-agent-python-sdk (local), uvicorn |
+| Frontend | Next.js 16, React 19, TypeScript, Agora Web SDK (RTC + RTM), agent-client-toolkit-ts, Zustand, Tailwind CSS |
+| Backend | Python 3.8+, FastAPI, agent-server-sdk-python, uvicorn |
 | Auth | Token007 (AccessToken2) — auto-generated from APP_ID + APP_CERTIFICATE |
 | Real-time | Agora RTC (audio) + RTM (messaging/transcription) |
 | AI Providers | Deepgram (ASR), OpenAI (LLM), ElevenLabs (TTS) |

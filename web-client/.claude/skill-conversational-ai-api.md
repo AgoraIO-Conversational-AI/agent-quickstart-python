@@ -1,40 +1,52 @@
-# Skill: Conversational AI API Integration
+# Skill: AgoraVoiceAI Integration (agent-client-toolkit-ts)
 
-ConversationalAIAPI is the core module for subtitle rendering and Agent state management.
+AgoraVoiceAI is the core module for subtitle rendering and Agent state management, provided by the `agent-client-toolkit-ts` package.
 
 ## Core Features
 
-- Real-time subtitle rendering (supports text/word/chunk modes)
-- Agent state monitoring
-- Message sending (text/image)
-- Interrupt control
+- Real-time subtitle rendering (transcript management)
+- Agent state monitoring (idle/listening/thinking/speaking/silent)
+- Error event handling with provider type info (llm/tts/mllm/context/unknown)
 
-## Initialization
+## Installation
+
+```bash
+bun add agent-client-toolkit-ts agent-client-toolkit-react
+```
+
+## Initialization (Imperative API)
 
 ```typescript
-import { ConversationalAIAPI, EConversationalAIAPIEvents } from '@/conversational-ai-api'
+import { AgoraVoiceAI, AgoraVoiceAIEvents } from 'agent-client-toolkit-ts'
 
-// Initialize (requires RTC/RTM client created first)
-const convoAIAPI = ConversationalAIAPI.init({
-  rtcEngine: rtcClient,
-  rtmEngine: rtmClient,
-  enableLog: true,  // Enable during development
+// Initialize after RTC client and RTM client are ready
+const voiceAI = await AgoraVoiceAI.init({
+  rtcEngine: rtcClient,        // IAgoraRTCClient from agora-rtc-sdk-ng
+  rtmConfig: { rtmEngine: rtmClient },  // RTMClient from agora-rtm
+  enableLog: true,
 })
 
 // Subscribe to channel messages
-convoAIAPI.subscribeMessage(channelName)
+voiceAI.subscribeMessage(channelName)
 ```
+
+> **Note**: We use the imperative API instead of `ConversationalAIProvider` because
+> conditional rendering of the Provider causes RTC LEAVE disconnect issues.
 
 ## Event Listeners
 
 ### Transcript Updated
 
 ```typescript
-import type { ITranscriptHelperItem, IUserTranscription, IAgentTranscription } from '@/conversational-ai-api/type'
+import type {
+  TranscriptHelperItem,
+  UserTranscription,
+  AgentTranscription,
+} from 'agent-client-toolkit-ts'
 
-convoAIAPI.on(
-  EConversationalAIAPIEvents.TRANSCRIPT_UPDATED,
-  (chatHistory: ITranscriptHelperItem<Partial<IUserTranscription | IAgentTranscription>>[]) => {
+voiceAI.on(
+  AgoraVoiceAIEvents.TRANSCRIPT_UPDATED,
+  (chatHistory: TranscriptHelperItem<Partial<UserTranscription | AgentTranscription>>[]) => {
     // chatHistory contains all conversation records
     const transcripts = chatHistory
       .sort((a, b) => {
@@ -45,7 +57,7 @@ convoAIAPI.on(
         id: `${item.turn_id}-${item.uid}-${item._time}`,
         type: Number(item.uid) !== 0 ? 'agent' : 'user',
         text: item.text || '',
-        status: item.status,  // 0=in progress, 1=ended, 2=interrupted
+        status: item.status,   // TurnStatus enum
         timestamp: item._time || Date.now(),
       }))
   }
@@ -55,12 +67,12 @@ convoAIAPI.on(
 ### Agent State Changed
 
 ```typescript
-import type { EAgentState } from '@/conversational-ai-api/type'
+import { AgentState } from 'agent-client-toolkit-ts'
 
-convoAIAPI.on(
-  EConversationalAIAPIEvents.AGENT_STATE_CHANGED,
-  (agentUserId: string, event: { state: EAgentState }) => {
-    // state: idle/listening/thinking/speaking/silent
+voiceAI.on(
+  AgoraVoiceAIEvents.AGENT_STATE_CHANGED,
+  (agentUserId: string, event: { state: AgentState }) => {
+    // AgentState: IDLE | LISTENING | THINKING | SPEAKING | SILENT
     console.log(`Agent state: ${event.state}`)
   }
 )
@@ -69,114 +81,66 @@ convoAIAPI.on(
 ### Agent Error
 
 ```typescript
-convoAIAPI.on(
-  EConversationalAIAPIEvents.AGENT_ERROR,
-  (agentUserId: string, error: { message: string }) => {
-    console.error(`Agent error: ${error.message}`)
+import type { ModuleError, ModuleType } from 'agent-client-toolkit-ts'
+
+voiceAI.on(
+  AgoraVoiceAIEvents.AGENT_ERROR,
+  (agentUserId: string, error: ModuleError) => {
+    // error.type: ModuleType (llm/tts/mllm/context/unknown)
+    // error.code: number
+    // error.message: string
+    console.error(`[${error.type}] ${error.message} (code: ${error.code})`)
   }
 )
 ```
 
-### Other Events
+### Message Error
 
 ```typescript
-// Agent interrupted
-convoAIAPI.on(EConversationalAIAPIEvents.AGENT_INTERRUPTED, (agentUserId, event) => {
-  console.log(`Agent interrupted: turn ${event.turnID}`)
-})
-
-// Performance metrics
-convoAIAPI.on(EConversationalAIAPIEvents.AGENT_METRICS, (agentUserId, metrics) => {
-  console.log(`${metrics.type} ${metrics.name}: ${metrics.value}ms`)
-})
-
-// Debug log
-convoAIAPI.on(EConversationalAIAPIEvents.DEBUG_LOG, (message) => {
-  console.debug(message)
-})
-```
-
-## Sending Messages
-
-### Send Text
-
-```typescript
-import { EChatMessageType, EChatMessagePriority } from '@/conversational-ai-api/type'
-
-await convoAIAPI.chat(agentUserId, {
-  messageType: EChatMessageType.TEXT,
-  text: 'Hello',
-  priority: EChatMessagePriority.INTERRUPTED,  // Interrupt current response
-  responseInterruptable: true,
-})
-```
-
-### Send Image
-
-```typescript
-await convoAIAPI.chat(agentUserId, {
-  messageType: EChatMessageType.IMAGE,
-  uuid: 'unique-id',
-  url: 'https://example.com/image.jpg',
-  // Or use base64
-  // base64: 'data:image/jpeg;base64,...',
-})
-```
-
-### Interrupt Agent
-
-```typescript
-await convoAIAPI.interrupt(agentUserId)
+voiceAI.on(
+  AgoraVoiceAIEvents.MESSAGE_ERROR,
+  (agentUserId: string, error: ModuleError) => {
+    console.error(`[${error.type}] ${error.message} (code: ${error.code})`)
+  }
+)
 ```
 
 ## Cleanup
 
 ```typescript
-// Unsubscribe
-convoAIAPI.unsubscribe()
+// Unsubscribe from messages
+voiceAI.unsubscribe()
 
-// Remove all event listeners
-convoAIAPI.removeAllEventListeners()
-
-// Completely destroy (singleton pattern)
-convoAIAPI.destroy()
+// Destroy instance
+voiceAI.destroy()
 ```
 
-## Subtitle Rendering Modes
-
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `text` | Full sentence rendering | Simple scenarios |
-| `word` | Word-by-word rendering (PTS sync) | High precision sync |
-| `chunk` | Chunk rendering | Streaming output |
-
-Mode is auto-detected based on received messages, no manual setting required.
-
-## Type Definitions
+## Key Types
 
 ```typescript
 import {
-  EConversationalAIAPIEvents,
-  EAgentState,
-  ETurnStatus,
-  EChatMessageType,
-  EChatMessagePriority,
-  type ITranscriptHelperItem,
-  type IUserTranscription,
-  type IAgentTranscription,
-} from '@/conversational-ai-api/type'
+  AgoraVoiceAI,
+  AgoraVoiceAIEvents,
+  AgentState,          // IDLE | LISTENING | THINKING | SPEAKING | SILENT
+  TurnStatus,          // IN_PROGRESS | END | INTERRUPTED
+  type TranscriptHelperItem,
+  type UserTranscription,
+  type AgentTranscription,
+  type ModuleError,    // { type: ModuleType, code: number, message: string }
+  type ModuleType,     // 'llm' | 'tts' | 'mllm' | 'context' | 'unknown'
+} from 'agent-client-toolkit-ts'
 ```
 
 ## Important Notes
 
-1. Must initialize RTC/RTM client before initializing ConversationalAIAPI
-2. `subscribeMessage` automatically binds RTC/RTM events
-3. Subtitle sync depends on RTC's `audio-pts` event
-4. When cleaning up, call `unsubscribe` first, then `removeAllEventListeners`
+1. Must initialize RTC and RTM clients before calling `AgoraVoiceAI.init()`
+2. Use imperative API (`AgoraVoiceAI.init()`) — do NOT use `ConversationalAIProvider`
+3. Call `subscribeMessage(channel)` after init to start receiving events
+4. When cleaning up, call `unsubscribe()` then `destroy()`
 
 ## Reference Files
 
-- `src/conversational-ai-api/index.ts` - API implementation
-- `src/conversational-ai-api/type.ts` - Type definitions
-- `src/conversational-ai-api/utils/sub-render.ts` - Subtitle render controller
-- `src/services/agora-service.ts` - Integration example
+- `src/hooks/useAgoraConnection.ts` - Full integration example
+- `src/stores/app-store.ts` - State types using AgentState/TurnStatus
+- `src/components/subtitle-panel.tsx` - Transcript rendering with TurnStatus
+- `src/components/control-bar.tsx` - Agent state display with AgentState
