@@ -63,7 +63,7 @@ class Agent:
             greeting="Hello! I am your AI assistant. How can I help you?",
             failure_message="I'm sorry, I'm having trouble processing your request.",
             advanced_features={"enable_rtm": True},
-            parameters={"data_channel": "rtm"},
+            parameters={"data_channel": "rtm", "enable_error_message": True},
         )
         
         agora_agent = (
@@ -77,7 +77,7 @@ class Agent:
             client=self.client,
             channel=channel_name,
             agent_uid=str(agent_uid),
-            remote_uids=[str(user_uid)],
+            remote_uids=["*"],
             enable_string_uid=True,
             idle_timeout=120,
         )

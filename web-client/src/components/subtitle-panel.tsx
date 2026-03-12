@@ -1,13 +1,13 @@
 'use client'
 
-import { ETurnStatus } from '@/conversational-ai-api/type'
+import { TurnStatus } from 'agent-client-toolkit-ts'
 import { cn } from '@/lib/utils'
 import { type TranscriptItem, useAppStore } from '@/stores/app-store'
 import { useEffect, useRef } from 'react'
 
 function TranscriptRow({ item }: { item: TranscriptItem }) {
   const isAgent = item.type === 'agent'
-  const isInProgress = item.status === ETurnStatus.IN_PROGRESS
+  const isInProgress = item.status === TurnStatus.IN_PROGRESS
 
   return (
     <div className={cn('flex gap-3 p-3', isAgent ? 'flex-row' : 'flex-row-reverse')}>

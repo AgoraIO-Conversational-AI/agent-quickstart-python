@@ -11,13 +11,8 @@ import {
     usePublish,
 } from 'agora-rtc-react'
 import AgoraRTM, { type RTMClient } from 'agora-rtm'
-import { ConversationalAIAPI, EConversationalAIAPIEvents } from '@/conversational-ai-api'
-import type {
-    EAgentState,
-    IAgentTranscription,
-    ITranscriptHelperItem,
-    IUserTranscription,
-} from '@/conversational-ai-api/type'
+import { AgoraVoiceAI, AgoraVoiceAIEvents } from 'agent-client-toolkit-ts'
+import type { TranscriptHelperItem, UserTranscription, AgentTranscription } from 'agent-client-toolkit-ts'
 import { getConfig, startAgent, stopAgent } from '@/services/api'
 import { type TranscriptItem, useAppStore } from '@/stores/app-store'
 
@@ -39,10 +34,8 @@ export function useAgoraConnection() {
     const [micEnabled, setMicEnabled] = useState(true)
 
     const rtmClientRef = useRef<RTMClient | null>(null)
-    const convoAIAPIRef = useRef<ConversationalAIAPI | null>(null)
     const currentAgentIdRef = useRef<string | null>(null)
-
-    const store = useAppStore.getState()
+    const voiceAIRef = useRef<AgoraVoiceAI | null>(null)
 
     const addLog = useCallback((message: string, level: 'info' | 'success' | 'error' | 'warning' = 'info') => {
         useAppStore.getState().addLog(message, level)
@@ -89,12 +82,11 @@ export function useAgoraConnection() {
         }
     })
 
-
-    // Initialize RTM and ConvoAI API after RTC join success
+    // Initialize RTM + AgoraVoiceAI + Agent after RTC join success
     useEffect(() => {
         if (!joinSuccess || !config || !client) return
 
-        const initRTMAndConvoAI = async () => {
+        const initAll = async () => {
             try {
                 // Initialize RTM
                 addLog('Initializing RTM Client...', 'info')
@@ -119,16 +111,16 @@ export function useAgoraConnection() {
                 await rtmClient.subscribe(config.channel)
                 addLog('Subscribed to RTM channel successfully', 'success')
 
-                // Initialize ConvoAI API
+                // Initialize AgoraVoiceAI (imperative, no Provider needed)
                 addLog('Initializing ConvoAI API...', 'info')
-                const convoAIAPI = ConversationalAIAPI.init({
+                const voiceAI = await AgoraVoiceAI.init({
                     rtcEngine: client as any,
-                    rtmEngine: rtmClient,
+                    rtmConfig: { rtmEngine: rtmClient },
                     enableLog: true,
                 })
-                convoAIAPIRef.current = convoAIAPI
-                convoAIAPI.subscribeMessage(config.channel)
-                setupConvoAIEvents(convoAIAPI)
+                voiceAIRef.current = voiceAI
+                setupVoiceAIEvents(voiceAI)
+                voiceAI.subscribeMessage(config.channel)
                 addLog('ConvoAI API initialized successfully', 'success')
 
                 // Start Agent
@@ -148,13 +140,13 @@ export function useAgoraConnection() {
             }
         }
 
-        initRTMAndConvoAI()
+        initAll()
     }, [joinSuccess, config, client, addLog])
 
-    const setupConvoAIEvents = (api: ConversationalAIAPI) => {
-        api.on(
-            EConversationalAIAPIEvents.TRANSCRIPT_UPDATED,
-            (chatHistory: ITranscriptHelperItem<Partial<IUserTranscription | IAgentTranscription>>[]) => {
+    const setupVoiceAIEvents = (ai: AgoraVoiceAI) => {
+        ai.on(
+            AgoraVoiceAIEvents.TRANSCRIPT_UPDATED,
+            (chatHistory: TranscriptHelperItem<Partial<UserTranscription | AgentTranscription>>[]) => {
                 const transcripts: TranscriptItem[] = chatHistory
                     .sort((a, b) => {
                         if (a.turn_id !== b.turn_id) return a.turn_id - b.turn_id
@@ -171,26 +163,29 @@ export function useAgoraConnection() {
             }
         )
 
-        api.on(
-            EConversationalAIAPIEvents.AGENT_STATE_CHANGED,
-            (_agentUserId: string, event: { state: EAgentState }) => {
+        ai.on(
+            AgoraVoiceAIEvents.AGENT_STATE_CHANGED,
+            (_agentUserId: string, event) => {
                 useAppStore.getState().setAgentState(event.state)
             }
         )
 
-        api.on(EConversationalAIAPIEvents.AGENT_ERROR, (_agentUserId: string, error: { message: string }) => {
-            addLog(`Agent error: ${error.message}`, 'error')
+        ai.on(AgoraVoiceAIEvents.AGENT_ERROR, (_agentUserId: string, error) => {
+            addLog(`Agent error: [${error.type}] ${error.message} (code: ${error.code})`, 'error')
+        })
+
+        ai.on(AgoraVoiceAIEvents.MESSAGE_ERROR, (_agentUserId: string, error) => {
+            addLog(`Message error: [${error.type}] ${error.message} (code: ${error.code})`, 'error')
         })
     }
 
-
     const cleanup = async () => {
-        if (convoAIAPIRef.current) {
+        if (voiceAIRef.current) {
             try {
-                convoAIAPIRef.current.unsubscribe()
-                convoAIAPIRef.current.removeAllEventListeners()
+                voiceAIRef.current.unsubscribe()
+                voiceAIRef.current.destroy()
             } catch { }
-            convoAIAPIRef.current = null
+            voiceAIRef.current = null
         }
 
         if (rtmClientRef.current) {
@@ -235,7 +230,6 @@ export function useAgoraConnection() {
     }, [addLog])
 
     const disconnect = useCallback(async () => {
-        // Stop Agent
         if (currentAgentIdRef.current && config?.channel) {
             try {
                 await stopAgent(config.channel, currentAgentIdRef.current)
@@ -249,13 +243,11 @@ export function useAgoraConnection() {
 
         await cleanup()
 
-        // Stop local track
         if (localMicrophoneTrack) {
             localMicrophoneTrack.stop()
             localMicrophoneTrack.close()
         }
 
-        // Leave RTC
         setShouldJoin(false)
         setConfig(null)
 

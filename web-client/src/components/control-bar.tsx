@@ -1,6 +1,6 @@
 'use client'
 
-import { EAgentState } from '@/conversational-ai-api/type'
+import { AgentState } from 'agent-client-toolkit-ts'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
 
@@ -10,20 +10,20 @@ interface ControlBarProps {
   onToggleMic: () => void
 }
 
-const stateLabels: Record<EAgentState, string> = {
-  [EAgentState.IDLE]: 'Idle',
-  [EAgentState.LISTENING]: 'Listening',
-  [EAgentState.THINKING]: 'Thinking',
-  [EAgentState.SPEAKING]: 'Speaking',
-  [EAgentState.SILENT]: 'Silent',
+const stateLabels: Record<AgentState, string> = {
+  [AgentState.IDLE]: 'Idle',
+  [AgentState.LISTENING]: 'Listening',
+  [AgentState.THINKING]: 'Thinking',
+  [AgentState.SPEAKING]: 'Speaking',
+  [AgentState.SILENT]: 'Silent',
 }
 
-const stateColors: Record<EAgentState, string> = {
-  [EAgentState.IDLE]: 'bg-slate-500',
-  [EAgentState.LISTENING]: 'bg-emerald-500',
-  [EAgentState.THINKING]: 'bg-amber-500',
-  [EAgentState.SPEAKING]: 'bg-blue-500',
-  [EAgentState.SILENT]: 'bg-slate-600',
+const stateColors: Record<AgentState, string> = {
+  [AgentState.IDLE]: 'bg-slate-500',
+  [AgentState.LISTENING]: 'bg-emerald-500',
+  [AgentState.THINKING]: 'bg-amber-500',
+  [AgentState.SPEAKING]: 'bg-blue-500',
+  [AgentState.SILENT]: 'bg-slate-600',
 }
 
 export function ControlBar({ onStartAgent, onStopAgent, onToggleMic }: ControlBarProps) {

@@ -8,10 +8,11 @@
     "lint": "biome check --write ."
   },
   "dependencies": {
-    "@agora-js/report": "^4.24.0",
+    "agent-client-toolkit-react": "^1.0.1",
+    "agent-client-toolkit-ts": "^1.0.0",
     "agora-rtc-react": "^2.2.0",
+    "agora-rtc-sdk-ng": "^4.24.2",
     "agora-rtm": "^2.2.3",
-    "lodash": "^4.17.21",
     "next": "^16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -19,7 +20,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
-    "@types/lodash": "^4.17.0",
     "@types/node": "^25.3.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

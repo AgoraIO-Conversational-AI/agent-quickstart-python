@@ -1,4 +1,4 @@
-import { EAgentState, type ETurnStatus } from '@/conversational-ai-api/type'
+import { AgentState, TurnStatus } from 'agent-client-toolkit-ts'
 import { create } from 'zustand'
 
 export type LogLevel = 'info' | 'success' | 'error' | 'warning'
@@ -14,35 +14,25 @@ export interface TranscriptItem {
   id: string
   type: 'user' | 'agent'
   text: string
-  status: ETurnStatus
+  status: TurnStatus
   timestamp: number
 }
 
 interface AppState {
-  // Connection
   isConnected: boolean
   isConnecting: boolean
   channelName: string
-
-  // Agent
   agentId: string | null
-  agentState: EAgentState
-
-  // Audio
+  agentState: AgentState
   isMicMuted: boolean
-
-  // Transcripts
   transcripts: TranscriptItem[]
-
-  // Logs
   logs: LogItem[]
 
-  // Actions
   setChannelName: (name: string) => void
   setIsConnecting: (connecting: boolean) => void
   setIsConnected: (connected: boolean) => void
   setAgentId: (id: string | null) => void
-  setAgentState: (state: EAgentState) => void
+  setAgentState: (state: AgentState) => void
   setIsMicMuted: (muted: boolean) => void
   setTranscripts: (transcripts: TranscriptItem[]) => void
   addLog: (message: string, level?: LogLevel) => void
@@ -55,7 +45,7 @@ const initialState = {
   isConnecting: false,
   channelName: '',
   agentId: null,
-  agentState: EAgentState.IDLE,
+  agentState: AgentState.IDLE,
   isMicMuted: false,
   transcripts: [],
   logs: [],
@@ -86,6 +76,5 @@ export const useAppStore = create<AppState>((set) => ({
     })),
 
   clearLogs: () => set({ logs: [] }),
-
   reset: () => set(initialState),
 }))
