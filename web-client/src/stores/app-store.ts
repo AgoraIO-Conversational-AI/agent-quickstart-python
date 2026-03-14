@@ -1,4 +1,4 @@
-import { AgentState, TurnStatus } from 'agent-client-toolkit-ts'
+import { AgentState, TurnStatus } from 'agora-agent-client-toolkit'
 import { create } from 'zustand'
 
 export type LogLevel = 'info' | 'success' | 'error' | 'warning'

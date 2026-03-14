@@ -50,11 +50,11 @@ await rtmClient.subscribe(channelName)
 
 ### 4. Pass to AgoraVoiceAI
 
-RTM message handling is managed by `AgoraVoiceAI` from `agent-client-toolkit-ts`.
+RTM message handling is managed by `AgoraVoiceAI` from `agora-agent-client-toolkit`.
 After RTM login and subscribe, pass the RTM client to AgoraVoiceAI:
 
 ```typescript
-import { AgoraVoiceAI } from 'agent-client-toolkit-ts'
+import { AgoraVoiceAI } from 'agora-agent-client-toolkit'
 
 const voiceAI = await AgoraVoiceAI.init({
   rtcEngine: rtcClient,

@@ -207,7 +207,7 @@ Next: Start new conversation, type "continue <task name>"
 | .claude/skill-overview.md | Skills overview and connection flow |
 | .claude/skill-rtc-integration.md | RTC integration with agora-rtc-react hooks |
 | .claude/skill-rtm-integration.md | RTM integration guide |
-| .claude/skill-conversational-ai-api.md | AgoraVoiceAI (agent-client-toolkit-ts) integration |
+| .claude/skill-conversational-ai-api.md | AgoraVoiceAI (agora-agent-client-toolkit) integration |
 
 ---
 

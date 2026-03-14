@@ -11,8 +11,8 @@ import {
     usePublish,
 } from 'agora-rtc-react'
 import AgoraRTM, { type RTMClient } from 'agora-rtm'
-import { AgoraVoiceAI, AgoraVoiceAIEvents } from 'agent-client-toolkit-ts'
-import type { TranscriptHelperItem, UserTranscription, AgentTranscription } from 'agent-client-toolkit-ts'
+import { AgoraVoiceAI, AgoraVoiceAIEvents } from 'agora-agent-client-toolkit'
+import type { TranscriptHelperItem, UserTranscription, AgentTranscription } from 'agora-agent-client-toolkit'
 import { getConfig, startAgent, stopAgent } from '@/services/api'
 import { type TranscriptItem, useAppStore } from '@/stores/app-store'
 

@@ -1,6 +1,6 @@
-# Skill: AgoraVoiceAI Integration (agent-client-toolkit-ts)
+# Skill: AgoraVoiceAI Integration (agora-agent-client-toolkit)
 
-AgoraVoiceAI is the core module for subtitle rendering and Agent state management, provided by the `agent-client-toolkit-ts` package.
+AgoraVoiceAI is the core module for subtitle rendering and Agent state management, provided by the `agora-agent-client-toolkit` package.
 
 ## Core Features
 
@@ -11,13 +11,13 @@ AgoraVoiceAI is the core module for subtitle rendering and Agent state managemen
 ## Installation
 
 ```bash
-bun add agent-client-toolkit-ts agent-client-toolkit-react
+bun add agora-agent-client-toolkit agora-agent-client-toolkit-react
 ```
 
 ## Initialization (Imperative API)
 
 ```typescript
-import { AgoraVoiceAI, AgoraVoiceAIEvents } from 'agent-client-toolkit-ts'
+import { AgoraVoiceAI, AgoraVoiceAIEvents } from 'agora-agent-client-toolkit'
 
 // Initialize after RTC client and RTM client are ready
 const voiceAI = await AgoraVoiceAI.init({
@@ -42,7 +42,7 @@ import type {
   TranscriptHelperItem,
   UserTranscription,
   AgentTranscription,
-} from 'agent-client-toolkit-ts'
+} from 'agora-agent-client-toolkit'
 
 voiceAI.on(
   AgoraVoiceAIEvents.TRANSCRIPT_UPDATED,
@@ -67,7 +67,7 @@ voiceAI.on(
 ### Agent State Changed
 
 ```typescript
-import { AgentState } from 'agent-client-toolkit-ts'
+import { AgentState } from 'agora-agent-client-toolkit'
 
 voiceAI.on(
   AgoraVoiceAIEvents.AGENT_STATE_CHANGED,
@@ -81,7 +81,7 @@ voiceAI.on(
 ### Agent Error
 
 ```typescript
-import type { ModuleError, ModuleType } from 'agent-client-toolkit-ts'
+import type { ModuleError, ModuleType } from 'agora-agent-client-toolkit'
 
 voiceAI.on(
   AgoraVoiceAIEvents.AGENT_ERROR,
@@ -128,7 +128,7 @@ import {
   type AgentTranscription,
   type ModuleError,    // { type: ModuleType, code: number, message: string }
   type ModuleType,     // 'llm' | 'tts' | 'mllm' | 'context' | 'unknown'
-} from 'agent-client-toolkit-ts'
+} from 'agora-agent-client-toolkit'
 ```
 
 ## Important Notes

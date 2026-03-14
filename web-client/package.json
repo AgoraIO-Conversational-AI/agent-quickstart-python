@@ -8,8 +8,8 @@
     "lint": "biome check --write ."
   },
   "dependencies": {
-    "agent-client-toolkit-react": "^1.0.1",
-    "agent-client-toolkit-ts": "^1.0.0",
+    "agora-agent-client-toolkit-react": "^0.1.0",
+    "agora-agent-client-toolkit": "^0.1.0",
     "agora-rtc-react": "^2.2.0",
     "agora-rtc-sdk-ng": "^4.24.2",
     "agora-rtm": "^2.2.3",

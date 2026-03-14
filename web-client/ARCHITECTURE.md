@@ -19,7 +19,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 | State Management | Zustand |
 | RTC SDK | agora-rtc-react |
 | RTM SDK | agora-rtm |
-| ConvoAI Toolkit | agent-client-toolkit-ts + agent-client-toolkit-react |
+| ConvoAI Toolkit | agora-agent-client-toolkit + agora-agent-client-toolkit-react |
 
 ### Backend
 
@@ -27,7 +27,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 |----------|------------|
 | Framework | FastAPI |
 | Language | Python 3 |
-| Agent SDK | agent-server-sdk-python |
+| Agent SDK | agora-agent-server-sdk |
 | Token | agora_agent.agentkit.token (generate_convo_ai_token) |
 
 ## Project Structure
@@ -56,7 +56,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 ├── ../server-python/        # Backend service (project root level)
 │   ├── src/
 │   │   ├── server.py        # FastAPI entry, route definitions
-│   │   └── agent.py         # Agent class using agent-server-sdk-python
+│   │   └── agent.py         # Agent class using agora-agent-server-sdk
 │   ├── requirements.txt     # Python dependencies
 │   └── .env.local           # Backend environment variables
 │
@@ -71,7 +71,7 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 - Real-time display of user and AI Agent conversation
 - Distinct styling for user/agent messages
 - Auto-scroll to latest message
-- Message status display via `TurnStatus` from `agent-client-toolkit-ts`
+- Message status display via `TurnStatus` from `agora-agent-client-toolkit`
 
 ### 2. LogPanel (Log Display)
 
@@ -84,14 +84,14 @@ A web demo showcasing quick integration of Agora Conversational AI, featuring re
 
 - Start/Stop Agent button
 - Microphone toggle button
-- Agent state indicator via `AgentState` from `agent-client-toolkit-ts`
+- Agent state indicator via `AgentState` from `agora-agent-client-toolkit`
 
 ## Data Flow
 
 ```
 User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
                    ↓
-              Zustand Store ← AgoraVoiceAI Events (agent-client-toolkit-ts)
+              Zustand Store ← AgoraVoiceAI Events (agora-agent-client-toolkit)
                    ↓
               UI Components
 ```
@@ -206,13 +206,13 @@ interface AppState {
   
   // Agent
   agentId: string | null
-  agentState: AgentState        // from agent-client-toolkit-ts
+  agentState: AgentState        // from agora-agent-client-toolkit
   
   // Audio
   isMicMuted: boolean
   
   // Transcripts
-  transcripts: TranscriptItem[] // uses TurnStatus from agent-client-toolkit-ts
+  transcripts: TranscriptItem[] // uses TurnStatus from agora-agent-client-toolkit
   
   // Logs
   logs: LogItem[]
@@ -225,7 +225,7 @@ interface AppState {
 2. AgoraRTCProvider creates RTC client
 3. useAgoraConnection hook manages connection via `useJoin`, `usePublish` hooks
 4. Use returned token to login RTM → Join RTC channel
-5. Initialize `AgoraVoiceAI` from `agent-client-toolkit-ts` (imperative API)
+5. Initialize `AgoraVoiceAI` from `agora-agent-client-toolkit` (imperative API)
 6. `voiceAI.subscribeMessage(channel)` to listen for subtitle/state events
 7. Call `/api/v2/startAgent` to start Agent
 8. Listen to `AgoraVoiceAIEvents` → Update Zustand store → UI re-renders

@@ -73,7 +73,7 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 
 ## SDK
 
-This project uses `agent-server-sdk-python`:
+This project uses `agora-agent-server-sdk`:
 - Package: `agora_agent`
 - Agent builder: `agora_agent.agentkit.Agent` with fluent `.with_llm()` / `.with_tts()` / `.with_stt()` API
 - Vendors: `OpenAI`, `ElevenLabsTTS`, `DeepgramSTT` from `agora_agent.agentkit.vendors`

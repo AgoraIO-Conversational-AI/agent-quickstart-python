@@ -1,6 +1,6 @@
 'use client'
 
-import { TurnStatus } from 'agent-client-toolkit-ts'
+import { TurnStatus } from 'agora-agent-client-toolkit'
 import { cn } from '@/lib/utils'
 import { type TranscriptItem, useAppStore } from '@/stores/app-store'
 import { useEffect, useRef } from 'react'

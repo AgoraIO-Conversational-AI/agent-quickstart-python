@@ -9,12 +9,12 @@ This document is designed for AI programming assistants to understand and work w
 **Tech Stack:**
 - Python 3.8+
 - FastAPI (web framework)
-- agent-server-sdk-python (Agora Agent SDK)
+- agora-agent-server-sdk (Agora Agent SDK)
 - uvicorn (ASGI server)
 
 **Architecture:**
 ```
-HTTP Request → FastAPI (server.py) → Agent (agent.py) → agent-server-sdk-python → Agora API
+HTTP Request → FastAPI (server.py) → Agent (agent.py) → agora-agent-server-sdk → Agora API
 ```
 
 **Key Components:**
@@ -175,14 +175,14 @@ token = generate_convo_ai_token(
 ### Core
 - `fastapi>=0.100.0` - Web framework
 - `uvicorn>=0.20.0` - ASGI server
-- `agent-server-sdk-python` - Agora Agent SDK
+- `agora-agent-server-sdk` - Agora Agent SDK
 - `python-dotenv>=1.0.0` - Environment management
 
 ## Troubleshooting
 
 ### Import Errors
 **Symptom:** `ModuleNotFoundError: No module named 'agora_agent'`
-**Solution:** Ensure `agent-server-sdk-python` is installed: `pip install -r requirements.txt`
+**Solution:** Ensure `agora-agent-server-sdk` is installed: `pip install -r requirements.txt`
 
 ### Configuration Errors
 **Symptom:** Service fails to start with ValueError

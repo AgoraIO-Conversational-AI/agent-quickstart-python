@@ -16,7 +16,7 @@ Python FastAPI service providing REST APIs for Agora Conversational AI Agent man
 | Framework | FastAPI |
 | Language | Python 3.8+ |
 | HTTP Server | Uvicorn |
-| Agent SDK | agent-server-sdk-python |
+| Agent SDK | agora-agent-server-sdk |
 | Config | python-dotenv |
 
 ## Project Structure
@@ -57,7 +57,7 @@ agent = Agent()  # Singleton
 ### 2. agent.py - Agent Management Layer
 
 **Responsibilities**:
-- Wrap agent-server-sdk-python
+- Wrap agora-agent-server-sdk
 - Configure ASR/LLM/TTS providers
 - Manage agent lifecycle (start/stop via AgentSession)
 - Parameter validation
@@ -234,7 +234,7 @@ FastAPI Router (server.py)
     ↓
 Agent Class (agent.py)
     ↓
-agent-server-sdk-python (AgentSession)
+agora-agent-server-sdk (AgentSession)
     ↓
 Agora REST API
     ↓
@@ -269,7 +269,7 @@ Frontend connects via Next.js proxy (`proxy.ts`):
 fastapi>=0.100.0          # Web framework
 uvicorn>=0.20.0           # ASGI server
 python-dotenv>=1.0.0      # Environment variables
-agent-server-sdk-python   # Agora Agent SDK
+agora-agent-server-sdk   # Agora Agent SDK
 ```
 
 ## Reference
