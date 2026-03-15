@@ -4,8 +4,8 @@
     "": {
       "name": "agora-conversational-ai-demo",
       "dependencies": {
-        "agora-agent-client-toolkit-js": "^0.1.0",
-        "agora-agent-client-toolkit-react-js": "^0.1.0",
+        "agora-agent-client-toolkit": "^0.1.1",
+        "agora-agent-client-toolkit-react": "^0.1.1",
         "agora-rtc-react": "^2.2.0",
         "agora-rtc-sdk-ng": "^4.24.2",
         "agora-rtm": "^2.2.3",
@@ -145,9 +145,9 @@
 
     "@types/react-dom": ["@types/react-dom@19.2.3", "", { "peerDependencies": { "@types/react": "^19.2.0" } }, "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ=="],
 
-    "agora-agent-client-toolkit-js": ["agora-agent-client-toolkit-js@0.1.0", "", { "optionalDependencies": { "@agora-js/report": ">=4.19.0", "jszip": ">=3.0.0" }, "peerDependencies": { "agora-rtc-sdk-ng": ">=4.23.4", "agora-rtm": ">=2.0.0" }, "optionalPeers": ["agora-rtm"] }, "sha512-6b8bx3ueXV7y8dufRk7Kx4iGBmdYz0TtkurX1FtgClEPcJub/cISNmp9caVRUhLABwjfiIQPdwy5ARL9R5Xruw=="],
+    "agora-agent-client-toolkit": ["agora-agent-client-toolkit@0.1.1", "", { "optionalDependencies": { "@agora-js/report": ">=4.19.0", "jszip": ">=3.0.0" }, "peerDependencies": { "agora-rtc-sdk-ng": ">=4.23.4", "agora-rtm": ">=2.0.0" }, "optionalPeers": ["agora-rtm"] }, "sha512-eV/BRpKq4rRhDDlvM8z4COrhFe4AgMuyXcZPxHM9ZMYivUYeSmTvDj10JdI/lH4/NEa0lc1nH8H/ZWCeRplHZw=="],
 
-    "agora-agent-client-toolkit-react-js": ["agora-agent-client-toolkit-react-js@0.1.0", "", { "peerDependencies": { "agora-agent-client-toolkit-js": ">=0.1.0", "agora-rtc-react": ">=2.0.0", "react": ">=18.0.0" } }, "sha512-WX3FTEmqad6mnRyYiJiuGvu6in3srodVaQHBwYe3GRlSsXJ5lfHofSKkr+CggeMG/OE2InOpTshI0a3dMDvMHg=="],
+    "agora-agent-client-toolkit-react": ["agora-agent-client-toolkit-react@0.1.1", "", { "peerDependencies": { "agora-agent-client-toolkit": ">=0.1.0", "agora-rtc-react": ">=2.0.0", "react": ">=18.0.0" } }, "sha512-sFaEyDtZp8XW8h/MeURiQfXjgLAR/wuRY9qLopX8D6m5U5lfID9KXr3E8J04sX6HuMCcUO8OgPhjL7sCInUGYA=="],
 
     "agora-rtc-react": ["agora-rtc-react@2.5.1", "", { "peerDependencies": { "react": ">=16.8" } }, "sha512-ORPbV02p8dZ2GhQxo5kTarc0BYjObc2IeqRPv9mi5/fxDI5nMY6kg54R5fUvLQU05H3Q5Kecq7M2kuZzHfNo5Q=="],
 

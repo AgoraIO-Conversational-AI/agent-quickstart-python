@@ -1,6 +1,6 @@
 'use client'
 
-import { AgentState } from 'agora-agent-client-toolkit-js'
+import { AgentState } from 'agora-agent-client-toolkit'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
 
