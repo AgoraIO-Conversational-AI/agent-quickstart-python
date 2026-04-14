@@ -1,46 +1,42 @@
-# Agora Conversational AI Web Demo
+# Agora Conversational AI Quickstart
 
-Real-time voice conversation with AI agents, featuring live transcription and log monitoring.
+A browser-based voice chat demo backed by a Python FastAPI service that creates Agora ConvoAI agents. Frontend runs on port 3000, backend on port 8000. After setup you can speak to an AI agent in real time with live transcription.
+
+- **Frontend:** Next.js 16 + React 19 + Agora Web SDK (RTC + RTM)
+- **Backend:** Python FastAPI + Agora Conversational AI Agent SDK
+- **Default AI pipeline:** DeepgramSTT (nova-3) → OpenAI (gpt-4o-mini) → MiniMaxTTS — no vendor API keys needed
+
+> **Important:** Your Agora project must have Conversational AI with managed provider support enabled. Without this, the app will start locally but agent creation will fail. The Agora CLI can verify this for you (see step 1).
 
 ## Prerequisites
 
 - [Bun](https://bun.sh/) (package manager & script runner)
 - Python 3.8+
 - [Agora CLI](https://www.npmjs.com/package/agoraio-cli) (`npm install -g agoraio-cli`)
+- macOS or Linux recommended (scripts use bash semantics)
 
-## Quick Start
-
-### 1. Get Agora Credentials
+## 1. Get Your Credentials
 
 ```bash
-# Log in (opens browser for OAuth)
 agora login
-
-# Create a project with ConvoAI enabled, or select an existing one
 agora project create my-convoai-demo --feature rtc --feature convoai
-# or: agora project use <existing-project>
-
-# Verify readiness
+# or select an existing project: agora project use <project-name>
 agora project doctor
-
-# Get App ID and App Certificate
 agora project show
 ```
 
-The output shows your `app_id` and `app_certificate` (sign key) — you will need them in the next step.
+`project show` displays your `App ID` and `App Certificate` (sign key). You will need both in the next step.
 
-### 2. Configure and Run
+`project doctor` confirms ConvoAI is enabled and the project is ready. If it reports issues, fix them before continuing.
+
+## 2. Configure
 
 ```bash
-# Install dependencies
 bun install
-
-# Set up backend env
-cd server-python
-cp .env.example .env.local
+cp server-python/.env.example server-python/.env.local
 ```
 
-Edit `server-python/.env.local` with the values from step 1:
+Edit `server-python/.env.local`:
 
 ```bash
 APP_ID=<your_app_id>
@@ -48,61 +44,76 @@ APP_CERTIFICATE=<your_app_certificate>
 PORT=8000
 ```
 
+That is all you need. Authentication tokens are generated automatically. No vendor API keys required.
+
+## 3. Run
+
 ```bash
-# Start both frontend and backend
-cd ..
 bun run dev
 ```
 
-### 3. Verify
+This single command handles everything: creates a Python venv if needed, installs backend dependencies, installs frontend dependencies if missing, and starts both services concurrently.
 
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 
-Open the frontend, start a conversation, and confirm the agent joins and responds with voice. That is your first success baseline.
+## 4. Verify First Success
 
-## Project Structure
+1. Open http://localhost:3000
+2. Allow microphone access when prompted
+3. Start a conversation session
+4. Say something and wait for the agent to respond
+5. Confirm you hear TTS audio back and see transcription in the UI
 
-```
-.
-├── web-client/       # Frontend — Next.js 16 + React 19 + TypeScript + Agora Web SDK
-├── server-python/    # Backend — Python FastAPI + Agora Agent SDK
-├── ARCHITECTURE.md   # System architecture and data flow
-└── AGENTS.md         # AI agent development guide
+If the UI loads but the conversation never starts, check the backend terminal output and try these API calls directly:
+
+```bash
+# Verify backend is running and credentials are loaded
+curl http://localhost:8000/get_config
+
+# Manually start an agent to isolate the issue
+curl -X POST http://localhost:8000/v2/startAgent \
+  -H "Content-Type: application/json" \
+  -d '{"channelName": "test", "rtcUid": "123456", "userUid": "789012"}'
 ```
 
 ## Commands
 
 ```bash
-bun run dev          # Start both frontend and backend
+bun run dev          # Start both frontend and backend (with auto-setup)
+bun run setup        # Run full setup without starting services
 bun run backend      # Backend only (port 8000)
 bun run frontend     # Frontend only (port 3000)
 bun run build        # Build frontend for production
 bun run clean        # Clean build artifacts and venvs
 ```
 
-## Configuration Details
+## Project Structure
 
-Authentication uses Token007 (AccessToken2), generated automatically from `APP_ID` and `APP_CERTIFICATE`. No vendor API keys are required — the backend defaults to the managed pipeline: DeepgramSTT (nova-3) + OpenAI (gpt-4o-mini) + MiniMaxTTS (speech_2_6_turbo).
-
-Frontend gets all configuration from the backend API — no environment variables required on the frontend side.
+```
+.
+├── web-client/       # Frontend — Next.js + React + Agora Web SDK
+├── server-python/    # Backend — FastAPI + Agora Agent SDK
+├── ARCHITECTURE.md   # System architecture and data flow
+└── AGENTS.md         # AI coding agent development guide
+```
 
 ## Troubleshooting
 
-| Problem | Check |
-|---------|-------|
-| Connection issues | Backend running on port 8000? |
-| Auth errors | `APP_ID` and `APP_CERTIFICATE` correct in `.env.local`? Run `agora project show` to verify. |
-| Agent fails to start | Run `agora project doctor` to check ConvoAI is enabled. Check logs at http://localhost:8000/docs |
-| Frontend can't reach backend | Proxy config in `web-client/proxy.ts` |
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| UI loads but conversation never starts | Invalid credentials or ConvoAI not enabled | Run `agora project doctor` and `agora project show` to verify. Check `APP_ID` and `APP_CERTIFICATE` in `.env.local` |
+| `curl /get_config` returns error | Backend not running or env not loaded | Check backend terminal output. Verify `server-python/.env.local` exists and has valid values |
+| Agent starts but no audio | Microphone not granted or browser blocking | Check browser permissions. Try a different browser |
+| Frontend can't reach backend | Proxy misconfiguration | Check `web-client/proxy.ts` — backend should be on port 8000 |
+| Python dependency errors | venv not created or wrong Python version | Run `bun run clean` then `bun run dev` to recreate from scratch |
 
 ## Documentation
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — System architecture and data flow
-- [AGENTS.md](./AGENTS.md) — AI agent development guide
-- [web-client/](./web-client/) — Frontend details
-- [server-python/](./server-python/) — Backend details
+- [AGENTS.md](./AGENTS.md) — AI coding agent development guide
+- [server-python/README.md](./server-python/README.md) — Backend API details
 
 ## License
 
