@@ -16,6 +16,41 @@ A real-time voice conversation application with AI agents, built with:
 └── server-python/        # Backend service (FastAPI + Agora Agent SDK)
 ```
 
+## Project Setup with Agora CLI
+
+AI agents should use the Agora CLI to obtain credentials and configure the project automatically, instead of asking the user to copy values from the Agora Console.
+
+```bash
+# 1. Check login status
+agora auth status --json
+
+# 2. If not logged in
+agora login
+
+# 3. Select or create a project with ConvoAI enabled
+agora project create my-convoai-demo --feature rtc --feature convoai
+# or select an existing project:
+agora project use <project-name>
+
+# 4. Get App ID and App Certificate
+agora project show --json
+# Parse app_id and app_certificate (sign key) from the JSON output
+
+# 5. Verify readiness
+agora project doctor --json
+# If ConvoAI is not enabled: agora project feature enable convoai
+```
+
+After extracting `app_id` and `app_certificate` from `project show --json`, write them directly into `server-python/.env.local`:
+
+```bash
+APP_ID=<extracted_app_id>
+APP_CERTIFICATE=<extracted_app_certificate>
+PORT=8000
+```
+
+Do not ask the user to manually copy credentials. Do not modify any source code in the project — only populate `.env.local`, install dependencies, and start the services.
+
 ## Quick Start
 
 ```bash
@@ -80,6 +115,8 @@ See [server-python/AGENTS.md](./server-python/AGENTS.md) for:
 
 ## Important Notes
 
+- Use `agora project show --json` to get App ID and App Certificate — do not ask the user to visit Agora Console
+- Do not modify sample source code until the first end-to-end conversation succeeds and the user explicitly requests changes
 - Never commit `.env.local` or credentials
 - Frontend proxies `/api/*` requests to backend via `web-client/proxy.ts`
 - Agent lifecycle is managed by backend (AgentSession), not frontend
