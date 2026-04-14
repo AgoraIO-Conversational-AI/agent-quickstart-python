@@ -6,17 +6,13 @@ Real-time voice conversation with AI agents, featuring live transcription and lo
 
 - [Bun](https://bun.sh/) (package manager & script runner)
 - Python 3.8+
-- [Agora Account](https://console.agora.io/) with App ID & App Certificate
-- Agora project with Conversational AI managed provider support enabled
+- [Agora CLI](https://www.npmjs.com/package/agoraio-cli) (`npm install -g agoraio-cli`)
 
-## Get Credentials via Agora CLI
+## Quick Start
 
-The fastest way to get your App ID and App Certificate is through the [Agora CLI](https://www.npmjs.com/package/agoraio-cli). This also works for AI coding agents that can run shell commands.
+### 1. Get Agora Credentials
 
 ```bash
-# Install the CLI
-npm install -g agoraio-cli
-
 # Log in (opens browser for OAuth)
 agora login
 
@@ -27,64 +23,44 @@ agora project create my-convoai-demo --feature rtc --feature convoai
 # Verify readiness
 agora project doctor
 
-# Get App ID and App Certificate from project details
-agora project show --json
+# Get App ID and App Certificate
+agora project show
 ```
 
-The `project show --json` output contains `app_id` and the App Certificate (sign key). Copy these values into `server-python/.env.local`.
+The output shows your `app_id` and `app_certificate` (sign key) — you will need them in the next step.
 
-If you already have an Agora project but ConvoAI is not enabled:
-
-```bash
-agora project feature enable convoai
-```
-
-## Quick Start
+### 2. Configure and Run
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 bun install
 
-# 2. Configure backend
+# Set up backend env
 cd server-python
 cp .env.example .env.local
-# Fill in APP_ID and APP_CERTIFICATE (from `agora project show --json` or Agora Console)
+```
 
-# 3. Start services
+Edit `server-python/.env.local` with the values from step 1:
+
+```bash
+APP_ID=<your_app_id>
+APP_CERTIFICATE=<your_app_certificate>
+PORT=8000
+```
+
+```bash
+# Start both frontend and backend
 cd ..
 bun run dev
 ```
 
-Services will be available at:
+### 3. Verify
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 
-## Configuration
-
-Edit `server-python/.env.local`:
-
-```bash
-# Agora Credentials (required — get from `agora project show --json` or Agora Console)
-APP_ID=your_agora_app_id
-APP_CERTIFICATE=your_agora_app_certificate
-
-PORT=8000
-```
-
-Authentication uses Token007 (AccessToken2), generated automatically from `APP_ID` and `APP_CERTIFICATE`. Vendor credentials are no longer required in local setup; the backend defaults to the same DeepgramSTT + OpenAI + MiniMaxTTS managed configuration used by the current Next.js quickstart.
-
-Frontend gets all configuration from the backend API — no environment variables required on the frontend side.
-
-## Commands
-
-```bash
-bun run dev          # Start both frontend and backend
-bun run backend      # Backend only (port 8000)
-bun run frontend     # Frontend only (port 3000)
-bun run build        # Build frontend for production
-bun run clean        # Clean build artifacts and venvs
-```
+Open the frontend, start a conversation, and confirm the agent joins and responds with voice. That is your first success baseline.
 
 ## Project Structure
 
@@ -96,13 +72,29 @@ bun run clean        # Clean build artifacts and venvs
 └── AGENTS.md         # AI agent development guide
 ```
 
+## Commands
+
+```bash
+bun run dev          # Start both frontend and backend
+bun run backend      # Backend only (port 8000)
+bun run frontend     # Frontend only (port 3000)
+bun run build        # Build frontend for production
+bun run clean        # Clean build artifacts and venvs
+```
+
+## Configuration Details
+
+Authentication uses Token007 (AccessToken2), generated automatically from `APP_ID` and `APP_CERTIFICATE`. No vendor API keys are required — the backend defaults to the managed pipeline: DeepgramSTT (nova-3) + OpenAI (gpt-4o-mini) + MiniMaxTTS (speech_2_6_turbo).
+
+Frontend gets all configuration from the backend API — no environment variables required on the frontend side.
+
 ## Troubleshooting
 
 | Problem | Check |
 |---------|-------|
 | Connection issues | Backend running on port 8000? |
-| Auth errors | `APP_ID` and `APP_CERTIFICATE` correct in `.env.local`? |
-| Agent fails to start | Confirm Agora managed provider access is enabled for this project, then check logs at http://localhost:8000/docs |
+| Auth errors | `APP_ID` and `APP_CERTIFICATE` correct in `.env.local`? Run `agora project show` to verify. |
+| Agent fails to start | Run `agora project doctor` to check ConvoAI is enabled. Check logs at http://localhost:8000/docs |
 | Frontend can't reach backend | Proxy config in `web-client/proxy.ts` |
 
 ## Documentation
