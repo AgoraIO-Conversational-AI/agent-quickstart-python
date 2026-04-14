@@ -19,7 +19,7 @@ A browser-based voice chat demo backed by a Python FastAPI service that creates 
 
 ```bash
 agora login
-agora project create my-convoai-demo --feature rtc --feature convoai
+agora project create my-convoai-demo --feature rtc --feature convoai --feature rtm
 # or select an existing project: agora project use <project-name>
 agora project doctor
 agora project show
