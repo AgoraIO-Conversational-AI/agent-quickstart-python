@@ -5,6 +5,12 @@ Agora Conversational AI Agent service built with FastAPI.
 ## Quick Start
 Follow [Get started with Agora](https://docs.agora.io/en/conversational-ai/get-started/manage-agora-account#enable-conversational-ai) to get the **App ID** and **App Certificate** and enable the **Conversational AI** service.
 
+Alternatively, use the [Agora CLI](https://www.npmjs.com/package/agoraio-cli) to get credentials directly from the terminal:
+
+```bash
+agora project show --json   # outputs app_id and app_certificate
+```
+
 ### 1. Configure Environment
 
 ```bash

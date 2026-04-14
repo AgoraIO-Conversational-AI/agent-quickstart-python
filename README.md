@@ -9,6 +9,36 @@ Real-time voice conversation with AI agents, featuring live transcription and lo
 - [Agora Account](https://console.agora.io/) with App ID & App Certificate
 - Agora project with Conversational AI managed provider support enabled
 
+## Get Credentials via Agora CLI
+
+The fastest way to get your App ID and App Certificate is through the [Agora CLI](https://www.npmjs.com/package/agoraio-cli). This also works for AI coding agents that can run shell commands.
+
+```bash
+# Install the CLI
+npm install -g agoraio-cli
+
+# Log in (opens browser for OAuth)
+agora login
+
+# Create a project with ConvoAI enabled, or select an existing one
+agora project create my-convoai-demo --feature rtc --feature convoai
+# or: agora project use <existing-project>
+
+# Verify readiness
+agora project doctor
+
+# Get App ID and App Certificate from project details
+agora project show --json
+```
+
+The `project show --json` output contains `app_id` and the App Certificate (sign key). Copy these values into `server-python/.env.local`.
+
+If you already have an Agora project but ConvoAI is not enabled:
+
+```bash
+agora project feature enable convoai
+```
+
 ## Quick Start
 
 ```bash
@@ -18,7 +48,7 @@ bun install
 # 2. Configure backend
 cd server-python
 cp .env.example .env.local
-# Edit .env.local with your credentials (see Configuration below)
+# Fill in APP_ID and APP_CERTIFICATE (from `agora project show --json` or Agora Console)
 
 # 3. Start services
 cd ..
@@ -35,7 +65,7 @@ Services will be available at:
 Edit `server-python/.env.local`:
 
 ```bash
-# Agora Credentials (required)
+# Agora Credentials (required — get from `agora project show --json` or Agora Console)
 APP_ID=your_agora_app_id
 APP_CERTIFICATE=your_agora_app_certificate
 
