@@ -147,7 +147,7 @@ class Agent:
             channel=channel_name,
             agent_uid=str(agent_uid),
             remote_uids=[str(user_uid)],
-            enable_string_uid=True,
+            enable_string_uid=False,
             idle_timeout=30,
             expires_in=3600,
         )
