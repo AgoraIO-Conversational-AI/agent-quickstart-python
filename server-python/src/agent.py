@@ -6,7 +6,7 @@ High-level API for managing Agora Conversational AI Agents.
 import logging
 import os
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from agora_agent import Area, AsyncAgora
 from agora_agent.agentkit import Agent as AgoraAgent
@@ -55,6 +55,7 @@ class Agent:
         channel_name: str,
         agent_uid: int,
         user_uid: int,
+        output_audio_codec: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Start agent with the same default vendor chain as the Next.js quickstart."""
         if not channel_name or not str(channel_name).strip():
@@ -102,6 +103,10 @@ class Agent:
         #     voice_id=os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
         # )
 
+        parameters = {"data_channel": "rtm", "enable_error_message": True}
+        if isinstance(output_audio_codec, str) and output_audio_codec.strip():
+            parameters["output_audio_codec"] = output_audio_codec.strip()
+
         agora_agent = AgoraAgent(
             name=name,
             instructions=ADA_PROMPT,
@@ -127,7 +132,7 @@ class Agent:
                 },
             },
             advanced_features={"enable_rtm": True, "enable_tools": True},
-            parameters={"data_channel": "rtm", "enable_error_message": True},
+            parameters=parameters,
         )
         
         agora_agent = (

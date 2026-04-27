@@ -11,7 +11,7 @@ import logging
 import os
 import random
 import time
-from typing import Optional
+from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 
 # Load environment variables from .env.local or .env
@@ -82,6 +82,7 @@ class StartAgentRequest(BaseModel):
     channelName: str
     rtcUid: int
     userUid: int
+    parameters: Optional[Dict[str, Any]] = None
 
 
 class StopAgentRequest(BaseModel):
@@ -152,10 +153,15 @@ async def start_agent(request: StartAgentRequest):
         )
 
     try:
+        output_audio_codec = None
+        if request.parameters:
+            output_audio_codec = request.parameters.get("output_audio_codec")
+
         result = await agent.start(
             channel_name=request.channelName,
             agent_uid=request.rtcUid,
             user_uid=request.userUid,
+            output_audio_codec=output_audio_codec,
         )
         return {"code": 0, "msg": "success", "data": result}
     except Exception as e:

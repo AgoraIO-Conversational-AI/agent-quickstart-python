@@ -8,7 +8,7 @@ class FakeAgent:
     def __init__(self):
         self.started_agent_ids = set()
 
-    async def start(self, channel_name: str, agent_uid: int, user_uid: int):
+    async def start(self, channel_name: str, agent_uid: int, user_uid: int, output_audio_codec=None):
         if not channel_name or agent_uid <= 0 or user_uid <= 0:
             raise ValueError("channel_name, agent_uid, and user_uid must be valid")
 
