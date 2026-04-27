@@ -7,10 +7,11 @@ HTTP APIs:
 - POST /v2/startAgent  -> Agent.start()
 - POST /v2/stopAgent   -> Agent.stop()
 """
+import logging
 import os
 import random
 import time
-from typing import Optional
+from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 
 # Load environment variables from .env.local or .env
@@ -24,6 +25,21 @@ from pydantic import BaseModel
 from agora_agent.agentkit.token import generate_convo_ai_token
 from agent import Agent
 
+logger = logging.getLogger("uvicorn.error")
+
+
+def _log_route_error(route: str, exc: Exception, **context) -> None:
+    """Log route failures with safe request context and a traceback."""
+    safe_context = {key: value for key, value in context.items() if value is not None}
+    logger.exception(
+        "Request failed route=%s context=%s error_type=%s error=%s",
+        route,
+        safe_context,
+        type(exc).__name__,
+        exc,
+    )
+
+
 def _to_http_error(exc: Exception) -> HTTPException:
     """Convert SDK exceptions to HTTP errors"""
     if isinstance(exc, ValueError):
@@ -35,8 +51,10 @@ def _to_http_error(exc: Exception) -> HTTPException:
 try:
     agent = Agent()
 except ValueError as e:
-    print(f"Warning: Failed to initialize SDK: {e}")
-    print("Service will fail if endpoints are called without proper configuration")
+    logger.exception(
+        "Failed to initialize Agora Agent SDK. Service will fail if endpoints are called without proper configuration: %s",
+        e,
+    )
     agent = None
 
 
@@ -64,6 +82,7 @@ class StartAgentRequest(BaseModel):
     channelName: str
     rtcUid: int
     userUid: int
+    parameters: Optional[Dict[str, Any]] = None
 
 
 class StopAgentRequest(BaseModel):
@@ -120,6 +139,7 @@ async def get_config(
             "msg": "success",
         }
     except Exception as e:
+        _log_route_error("/get_config", e, channel=channel, uid=uid)
         raise _to_http_error(e)
 
 
@@ -133,13 +153,25 @@ async def start_agent(request: StartAgentRequest):
         )
 
     try:
+        output_audio_codec = None
+        if request.parameters:
+            output_audio_codec = request.parameters.get("output_audio_codec")
+
         result = await agent.start(
             channel_name=request.channelName,
             agent_uid=request.rtcUid,
             user_uid=request.userUid,
+            output_audio_codec=output_audio_codec,
         )
         return {"code": 0, "msg": "success", "data": result}
     except Exception as e:
+        _log_route_error(
+            "/v2/startAgent",
+            e,
+            channelName=request.channelName,
+            rtcUid=request.rtcUid,
+            userUid=request.userUid,
+        )
         raise _to_http_error(e)
 
 
@@ -156,6 +188,7 @@ async def stop_agent(request: StopAgentRequest):
         await agent.stop(request.agentId)
         return {"code": 0, "msg": "success"}
     except Exception as e:
+        _log_route_error("/v2/stopAgent", e, agentId=request.agentId)
         raise _to_http_error(e)
 
 
