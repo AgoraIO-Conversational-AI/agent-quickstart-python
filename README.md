@@ -32,15 +32,15 @@ bun install
 agora login
 agora project create my-first-voice-agent --feature rtc --feature convoai
 agora project use my-first-voice-agent
-agora project env write server-python/.env.local --with-secrets
+agora project env write server/.env.local --with-secrets
 
 # 3. Start services
 bun run dev
 ```
 
-`server-python/.env.example` remains the reference for the variables this demo uses. The recommended path is to let the Agora CLI write the real values into `server-python/.env.local`.
+`server/.env.example` remains the reference for the variables this demo uses. The recommended path is to let the Agora CLI write the real values into `server/.env.local`.
 
-`bun install` is run from the repo root and manages the `web-client` package through the root Bun workspace.
+`bun install` is run from the repo root and manages the `web` package through the root Bun workspace.
 
 Services will be available at:
 - Frontend: http://localhost:3000
@@ -51,7 +51,7 @@ In local development, the browser still calls `/api/*` on the Next app. Those ro
 
 ### Single-Target Web Deployment
 
-Deploy `web-client` as a Next.js app. In this mode, the Next route handlers serve these endpoints directly:
+Deploy `web` as a Next.js app. In this mode, the Next route handlers serve these endpoints directly:
 
 - `/api/get_config`
 - `/api/v2/startAgent`
@@ -72,7 +72,7 @@ Do not set `AGENT_BACKEND_URL` in deployment unless you intentionally want the w
 Recommended:
 
 ```bash
-agora project env write server-python/.env.local --with-secrets
+agora project env write server/.env.local --with-secrets
 ```
 
 Reference template:
@@ -87,7 +87,7 @@ PORT=8000
 
 Authentication uses Token007 (AccessToken2), generated automatically from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. Vendor credentials are no longer required in local setup; the backend defaults to the same DeepgramSTT + OpenAI + MiniMaxTTS managed configuration used by the current Next.js quickstart.
 
-Frontend deployment env vars live in the deployment target or `web-client/.env.local` when running the web app by itself. The browser does not need its own public Agora credentials in this sample.
+Frontend deployment env vars live in the deployment target or `web/.env.local` when running the web app by itself. The browser does not need its own public Agora credentials in this sample.
 
 ## Commands
 
@@ -110,8 +110,8 @@ bun run clean        # Clean build artifacts and venvs
 
 ```
 .
-├── web-client/       # Frontend — Next.js 16 + React 19 + TypeScript + Agora Web SDK
-├── server-python/    # Backend — Python FastAPI + Agora Agent SDK
+├── web/       # Frontend — Next.js 16 + React 19 + TypeScript + Agora Web SDK
+├── server/    # Backend — Python FastAPI + Agora Agent SDK
 ├── ARCHITECTURE.md   # System architecture and data flow
 └── AGENTS.md         # AI agent development guide
 ```
@@ -121,7 +121,7 @@ bun run clean        # Clean build artifacts and venvs
 | Problem | Check |
 |---------|-------|
 | Connection issues | Backend running on port 8000? |
-| Agora credentials not written yet | Run `agora project use my-first-voice-agent` and `agora project env write server-python/.env.local --with-secrets` |
+| Agora credentials not written yet | Run `agora project use my-first-voice-agent` and `agora project env write server/.env.local --with-secrets` |
 | Auth errors | `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` correct in `.env.local`? |
 | Agent fails to start | Confirm Agora managed provider access is enabled for this project, then check logs at http://localhost:8000/docs |
 | Frontend can't reach backend | If running local Python mode, confirm `AGENT_BACKEND_URL=http://localhost:8000` is set via the root frontend scripts |
@@ -138,10 +138,10 @@ bun run verify:web
 bun run verify:local
 ```
 
-When working inside `web-client` as a standalone deployable app:
+When working inside `web` as a standalone deployable app:
 
 ```bash
-cd web-client
+cd web
 bun run doctor
 bun run verify
 ```
@@ -161,8 +161,8 @@ bun run verify:backend
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — System architecture and data flow
 - [AGENTS.md](./AGENTS.md) — AI agent development guide
-- [web-client/](./web-client/) — Frontend details
-- [server-python/](./server-python/) — Backend details
+- [web/](./web/) — Frontend details
+- [server/](./server/) — Backend details
 
 ## License
 

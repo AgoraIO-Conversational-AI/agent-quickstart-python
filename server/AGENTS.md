@@ -1,6 +1,6 @@
 # Python Backend Agent Guide
 
-Use this guide when changing files under `server-python/`.
+Use this guide when changing files under `server/`.
 
 ## Current Role
 
@@ -30,7 +30,7 @@ The deployed web app can also serve `/api/*` directly from Next route handlers, 
 Setup from the repo root:
 
 ```bash
-cp server-python/.env.example server-python/.env.local
+cp server/.env.example server/.env.local
 ```
 
 Required values:
@@ -66,7 +66,7 @@ bun run doctor:local
 bun run verify:backend
 ```
 
-From `server-python/` directly:
+From `server/` directly:
 
 ```bash
 python3 -m venv venv

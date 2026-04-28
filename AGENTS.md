@@ -7,14 +7,14 @@ This guide is for coding agents making changes in `agent-quickstart-python`.
 - Read [README.md](./README.md) for setup, supported run modes, and verification.
 - Use [ARCHITECTURE.md](./ARCHITECTURE.md) for system-level request flow.
 - Use module guides only when working inside that module:
-  - [web-client/AGENTS.md](./web-client/AGENTS.md)
-  - [server-python/AGENTS.md](./server-python/AGENTS.md)
+  - [web/AGENTS.md](./web/AGENTS.md)
+  - [server/AGENTS.md](./server/AGENTS.md)
 
 ## Current System Shape
 
 - Frontend: Next.js 16, React 19, TypeScript, `agora-rtc-react`, `agora-rtm`, `agora-agent-client-toolkit`, `agora-agent-uikit`
-- Local backend: Python FastAPI in `server-python`
-- Deployed web backend: Next route handlers in `web-client/app/api`
+- Local backend: Python FastAPI in `server`
+- Deployed web backend: Next route handlers in `web/app/api`
 - Auth: Token007 generated from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`
 - Default agent config: managed Deepgram STT, OpenAI LLM, and MiniMax TTS
 
@@ -30,31 +30,31 @@ This guide is for coding agents making changes in `agent-quickstart-python`.
 
 ### Single-Target Web Deployment
 
-- Deploy `web-client` as a Next.js app
+- Deploy `web` as a Next.js app
 - `/api/get_config`, `/api/v2/startAgent`, and `/api/v2/stopAgent` run inside the Next app
 - Do not assume a separate Python service exists in this mode
 
 ## Routing Ownership
 
-- UI and RTC/RTM client lifecycle live in `web-client`
-- `/api/*` entrypoints for the web app live in `web-client/app/api`
-- Python agent lifecycle logic lives in `server-python/src`
+- UI and RTC/RTM client lifecycle live in `web`
+- `/api/*` entrypoints for the web app live in `web/app/api`
+- Python agent lifecycle logic lives in `server/src`
 - For deployability changes, update both the README and architecture docs if the owner of `/api/*` changes
 
 ## Key Files
 
 - `README.md`: setup, local vs deploy modes, troubleshooting, verification
 - `ARCHITECTURE.md`: top-level environment model
-- `web-client/src/components/app.tsx`: conversation UI shell
-- `web-client/src/hooks/useAgoraConnection.ts`: RTC, RTM, transcript, and token renewal lifecycle
-- `web-client/src/lib/server/agora.ts`: shared server-side token and agent helpers for Next route handlers
-- `server-python/src/server.py`: FastAPI entrypoints
-- `server-python/src/agent.py`: async Agora agent lifecycle wrapper
+- `web/src/components/app.tsx`: conversation UI shell
+- `web/src/hooks/useAgoraConnection.ts`: RTC, RTM, transcript, and token renewal lifecycle
+- `web/src/lib/server/agora.ts`: shared server-side token and agent helpers for Next route handlers
+- `server/src/server.py`: FastAPI entrypoints
+- `server/src/agent.py`: async Agora agent lifecycle wrapper
 
 ## Working Rules
 
 - Prefer the smallest change that keeps local mode and deployed mode aligned.
-- Do not reintroduce `web-client/proxy.ts`; the current proxy fallback is route-local through `AGENT_BACKEND_URL`.
+- Do not reintroduce `web/proxy.ts`; the current proxy fallback is route-local through `AGENT_BACKEND_URL`.
 - Do not assume Zustand or a separate client-side store exists.
 - Do not require third-party vendor API keys unless the code actually introduces a non-managed path.
 - Keep token expiry and renewal behavior aligned across the Python backend and Next route handlers.
@@ -81,7 +81,7 @@ bun run verify:web:proxy
 bun run verify:backend
 ```
 
-Inside `web-client/`, use:
+Inside `web/`, use:
 
 ```bash
 bun run doctor
@@ -95,7 +95,7 @@ Before finishing a change:
 1. Run the narrowest relevant verification command.
 2. If the change affects the deployable web app, ensure `bun run verify:web` passes.
 3. If the change affects local Python-backed development, ensure `bun run verify:local` or the narrower `bun run verify:local:fastapi` / `bun run verify:web:proxy` / `bun run verify:backend` commands pass as appropriate.
-4. Treat `server-python/.env.local` as CLI-managed by default. If you change required env vars or setup steps, update both the root README and the module README.
+4. Treat `server/.env.local` as CLI-managed by default. If you change required env vars or setup steps, update both the root README and the module README.
 5. Update `README.md` or architecture docs when the developer workflow or request flow changes.
 
 `bun run verify:local:fastapi` exercises the real FastAPI route layer through Next, but with a fake agent implementation so the check stays deterministic and does not depend on a live managed-agent start.

@@ -16,8 +16,8 @@ FastAPI service on :8000
 Agora Cloud Services
 ```
 
-- `web-client` owns the browser UI and the `/api/*` entrypoints
-- `server-python` owns the actual token generation and agent start/stop logic
+- `web` owns the browser UI and the `/api/*` entrypoints
+- `server` owns the actual token generation and agent start/stop logic
 - this is the mode used by `bun run dev`
 
 ## Single-Target Web Deployment
@@ -32,8 +32,8 @@ Next.js app
 Agora Cloud Services
 ```
 
-- `web-client` owns both the UI and the deployed `/api/*` implementation
-- `server-python` is not required for this deployment path
+- `web` owns both the UI and the deployed `/api/*` implementation
+- `server` is not required for this deployment path
 
 ## Shared Conversation Flow
 
@@ -87,7 +87,7 @@ Token007 (AccessToken2) — generated from `AGORA_APP_ID` + `AGORA_APP_CERTIFICA
 
 ## Detailed Documentation
 
-- [web-client/ARCHITECTURE.md](./web-client/ARCHITECTURE.md) — Frontend architecture, components, state management
-- [server-python/ARCHITECTURE.md](./server-python/ARCHITECTURE.md) — Backend architecture, endpoints, AI provider config
+- [web/ARCHITECTURE.md](./web/ARCHITECTURE.md) — Frontend architecture, components, state management
+- [server/ARCHITECTURE.md](./server/ARCHITECTURE.md) — Backend architecture, endpoints, AI provider config
 - [AGENTS.md](./AGENTS.md) — AI agent development guide
 - [README.md](./README.md) — Quick start, configuration, deployment

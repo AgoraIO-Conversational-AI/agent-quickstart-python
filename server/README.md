@@ -8,7 +8,7 @@ Use the repo-root [README.md](../README.md) for the normal full-stack local flow
 
 Follow [Get started with Agora](https://docs.agora.io/en/conversational-ai/get-started/manage-agora-account#enable-conversational-ai) to get the **App ID** and **App Certificate** and enable the **Conversational AI** service.
 
-From `server-python/`:
+From `server/`:
 
 ### 1. Configure Environment
 
