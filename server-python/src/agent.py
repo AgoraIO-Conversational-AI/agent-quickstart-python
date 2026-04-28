@@ -137,9 +137,9 @@ class Agent:
         
         agora_agent = (
             agora_agent
+            .with_stt(stt)
             .with_llm(llm)
             .with_tts(tts)
-            .with_stt(stt)
         )
 
         session = agora_agent.create_async_session(
