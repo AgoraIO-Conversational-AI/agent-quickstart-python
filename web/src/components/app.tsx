@@ -4,6 +4,7 @@ import { useAgoraConnection } from '@/hooks/useAgoraConnection'
 import { cn } from '@/lib/utils'
 import { AgentVisualizer, ConvoTextStream } from 'agora-agent-uikit'
 import { MicButtonWithVisualizer } from 'agora-agent-uikit/rtc'
+import { ShareButton } from './share-button'
 
 export default function App() {
   const {
@@ -38,6 +39,9 @@ export default function App() {
       />
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
+        <div className="absolute right-4 top-4">
+          <ShareButton />
+        </div>
         {!isConnected ? (
           <section className="flex w-full max-w-xl flex-col items-center gap-5 text-center">
             <p className="animate-fade-up text-xs font-medium uppercase tracking-[0.28em] text-[hsl(var(--muted-foreground))]">
