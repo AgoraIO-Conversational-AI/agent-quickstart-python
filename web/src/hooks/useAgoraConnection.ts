@@ -133,10 +133,12 @@ export function useAgoraConnection() {
 
     const initializeSession = async () => {
       try {
-        const rtmClient = new AgoraRTM.RTM(config.appId, String(config.uid))
-        await rtmClient.login({ token: config.token })
-        await rtmClient.subscribe(config.channel)
-        rtmClientRef.current = rtmClient
+        // RTM is already initialized in connect() — use the existing client.
+        // This ensures presence events are captured from the start.
+        const rtmClient = rtmClientRef.current
+        if (!rtmClient) {
+          throw new Error('RTM client not initialized')
+        }
 
         const voiceAI = await AgoraVoiceAI.init({
           rtcEngine: client,
@@ -206,13 +208,23 @@ export function useAgoraConnection() {
 
     try {
       const configData = await getConfig()
-      setConfig({
+      const connectionConfig: ConnectionConfig = {
         appId: configData.app_id,
         channel: configData.channel_name,
         token: configData.token,
         uid: Number(configData.uid),
         agentUid: Number(configData.agent_uid),
-      })
+      }
+
+      // RTM must be ready BEFORE RTC join so presence events are not lost.
+      // This matches the Next.js quickstart pattern where RTM is initialized
+      // in LandingPage before ConversationComponent mounts.
+      const rtmClient = new AgoraRTM.RTM(connectionConfig.appId, String(connectionConfig.uid))
+      await rtmClient.login({ token: connectionConfig.token })
+      await rtmClient.subscribe(connectionConfig.channel)
+      rtmClientRef.current = rtmClient
+
+      setConfig(connectionConfig)
       setShouldJoin(true)
     } catch (nextError) {
       setIsConnecting(false)
