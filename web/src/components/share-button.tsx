@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 
-const REPO_URL = 'https://github.com/AgoraIO-Conversational-AI/agent-quickstart-python'
+const REPO_URL =
+  process.env.NEXT_PUBLIC_SHARE_URL ||
+  'https://github.com/AgoraIO-Conversational-AI/agent-quickstart-python'
 const SHARE_IMAGE = '/share-card.jpg'
 
 const X_TEXT = 'Just built a real-time AI voice agent I can talk to in the browser — powered by @AgoraIO'
