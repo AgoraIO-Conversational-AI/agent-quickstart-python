@@ -6,6 +6,12 @@ import { AgentVisualizer, ConvoTextStream } from 'agora-agent-uikit'
 import { MicButtonWithVisualizer } from 'agora-agent-uikit/rtc'
 import { ShareButton } from './share-button'
 
+const HERO_TITLE =
+  process.env.NEXT_PUBLIC_HERO_TITLE || 'Python Voice AI Quickstart'
+const HERO_SUBTITLE =
+  process.env.NEXT_PUBLIC_HERO_SUBTITLE ||
+  'The Python backend now mirrors the current Next.js quickstart contract: one requester, one agent, UIKit transcript UI, and renewed RTC plus RTM tokens.'
+
 export default function App() {
   const {
     RemoteUser,
@@ -48,11 +54,11 @@ export default function App() {
               Agora Conversational AI
             </p>
             <h1 className="animate-fade-up animate-fade-up-d1 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Python Voice AI Quickstart
+              {HERO_TITLE}
             </h1>
+            
             <p className="animate-fade-up animate-fade-up-d2 max-w-md text-sm leading-6 text-[hsl(var(--muted-foreground))] sm:text-base">
-              The Python backend now mirrors the current Next.js quickstart contract: one requester,
-              one agent, UIKit transcript UI, and renewed RTC plus RTM tokens.
+              {HERO_SUBTITLE}
             </p>
 
             <button
