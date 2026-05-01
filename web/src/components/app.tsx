@@ -56,7 +56,6 @@ export default function App() {
             <h1 className="animate-fade-up animate-fade-up-d1 text-3xl font-semibold tracking-tight sm:text-4xl">
               {HERO_TITLE}
             </h1>
-            
             <p className="animate-fade-up animate-fade-up-d2 max-w-md text-sm leading-6 text-[hsl(var(--muted-foreground))] sm:text-base">
               {HERO_SUBTITLE}
             </p>
