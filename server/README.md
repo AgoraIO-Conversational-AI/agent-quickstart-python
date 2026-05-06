@@ -59,7 +59,7 @@ The service will start on port 8000 (or the port specified in `.env.local`).
 
 ## How This Fits The Repo
 
-- Full-stack local development: run `bun run dev` from the repo root. The browser still calls Next `/api/*`, and those route handlers proxy to this FastAPI service.
+- Full-stack local development: run `bun run dev` or `npm run dev` from the repo root. The browser still calls Next `/api/*`, and those route handlers proxy to this FastAPI service.
 - Module-local backend work: use the commands in this README when you only need to run or inspect the Python service itself.
 - Single-target web deployment: this Python service is not required unless you intentionally point `AGENT_BACKEND_URL` at an external backend.
 
@@ -88,7 +88,7 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 
 `/get_config` now issues one-hour RTC plus RTM tokens. The web client renews both before expiry, matching the reference Next.js session model.
 
-The repo-level `bun run verify:local:fastapi` check exercises this FastAPI app through the Next proxy path, but it swaps in a fake agent implementation so route wiring can be verified without depending on a live agent start.
+The repo-level `verify:local:fastapi` check exercises this FastAPI app through the Next proxy path, but it swaps in a fake agent implementation so route wiring can be verified without depending on a live agent start.
 
 ## Requirements
 

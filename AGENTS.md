@@ -22,7 +22,7 @@ This guide is for coding agents making changes in `agent-quickstart-python`.
 
 ### Local Python-Backed Development
 
-- Run from the repo root with `bun run dev`
+- Run from the repo root with `bun run dev` or `npm run dev`
 - Root scripts start:
   - FastAPI on `http://localhost:8000`
   - Next.js on `http://localhost:3000`
@@ -65,11 +65,20 @@ From the repo root:
 
 ```bash
 bun install
+# or
+npm install
+
 bun run doctor
 bun run doctor:local
 bun run dev
 bun run verify
 bun run verify:local
+# or
+npm run doctor
+npm run doctor:local
+npm run dev
+npm run verify
+npm run verify:local
 ```
 
 Useful narrower checks:
@@ -79,6 +88,11 @@ bun run verify:web
 bun run verify:local:fastapi
 bun run verify:web:proxy
 bun run verify:backend
+# or
+npm run verify:web
+npm run verify:local:fastapi
+npm run verify:web:proxy
+npm run verify:backend
 ```
 
 Inside `web/`, use:
@@ -86,6 +100,9 @@ Inside `web/`, use:
 ```bash
 bun run doctor
 bun run verify
+# or
+npm run doctor
+npm run verify
 ```
 
 ## Done Criteria
@@ -93,9 +110,9 @@ bun run verify
 Before finishing a change:
 
 1. Run the narrowest relevant verification command.
-2. If the change affects the deployable web app, ensure `bun run verify:web` passes.
-3. If the change affects local Python-backed development, ensure `bun run verify:local` or the narrower `bun run verify:local:fastapi` / `bun run verify:web:proxy` / `bun run verify:backend` commands pass as appropriate.
+2. If the change affects the deployable web app, ensure `bun run verify:web` or `npm run verify:web` passes.
+3. If the change affects local Python-backed development, ensure `bun run verify:local` or `npm run verify:local`, or the narrower `verify:local:fastapi` / `verify:web:proxy` / `verify:backend` commands, pass as appropriate.
 4. Treat `server/.env.local` as CLI-managed by default. If you change required env vars or setup steps, update both the root README and the module README.
 5. Update `README.md` or architecture docs when the developer workflow or request flow changes.
 
-`bun run verify:local:fastapi` exercises the real FastAPI route layer through Next, but with a fake agent implementation so the check stays deterministic and does not depend on a live managed-agent start.
+`verify:local:fastapi` exercises the real FastAPI route layer through Next, but with a fake agent implementation so the check stays deterministic and does not depend on a live managed-agent start.

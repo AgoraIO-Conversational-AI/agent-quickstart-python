@@ -36,7 +36,7 @@ Use this guide when changing files under `web/`.
 
 ### Local Development
 
-- Run `bun run dev` from the repo root
+- Run `bun run dev` or `npm run dev` from the repo root
 - The Next route handlers stay in the request path
 - They proxy to `http://localhost:8000` when `AGENT_BACKEND_URL` is set by the root scripts
 
@@ -60,6 +60,9 @@ From the repo root:
 ```bash
 bun run frontend
 bun run verify:web
+# or
+npm run frontend
+npm run verify:web
 ```
 
 Useful narrower check:
@@ -67,13 +70,19 @@ Useful narrower check:
 ```bash
 bun run verify:web:api
 bun run verify:local:fastapi
+# or
+npm run verify:web:api
+npm run verify:local:fastapi
 ```
 
-`bun run verify:local:fastapi` boots the FastAPI app and checks the Next proxy path against its real routes, but swaps in a fake agent implementation so the smoke test stays fast and deterministic.
+`verify:local:fastapi` boots the FastAPI app and checks the Next proxy path against its real routes, but swaps in a fake agent implementation so the smoke test stays fast and deterministic.
 
 From `web/` directly:
 
 ```bash
 bun run doctor
 bun run verify
+# or
+npm run doctor
+npm run verify
 ```

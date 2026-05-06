@@ -18,7 +18,7 @@ Agora Cloud Services
 
 - `web` owns the browser UI and the `/api/*` entrypoints
 - `server` owns the actual token generation and agent start/stop logic
-- this is the mode used by `bun run dev`
+- this is the mode used by `bun run dev` or `npm run dev`
 
 ## Single-Target Web Deployment
 

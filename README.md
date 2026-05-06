@@ -14,7 +14,7 @@ Real-time voice conversation with AI agents, featuring the Agora UIKit transcrip
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) (package manager & script runner)
+- [Node.js](https://nodejs.org/) 20+ with npm, or [Bun](https://bun.sh/)
 - Python 3.8+
 - [Agora CLI](https://www.npmjs.com/package/agoraio-cli)
 - [Agora Account](https://console.agora.io/) with App ID & App Certificate
@@ -27,6 +27,8 @@ Real-time voice conversation with AI agents, featuring the Agora UIKit transcrip
 ```bash
 # 1. Install dependencies
 bun install
+# or
+npm install
 
 # 2. Login and connect the demo to Agora
 agora login
@@ -36,11 +38,13 @@ agora project env write server/.env.local --with-secrets
 
 # 3. Start services
 bun run dev
+# or
+npm run dev
 ```
 
 `server/.env.example` remains the reference for the variables this demo uses. The recommended path is to let the Agora CLI write the real values into `server/.env.local`.
 
-`bun install` is run from the repo root and manages the `web` package through the root Bun workspace.
+Install dependencies from the repo root. The workspace supports either Bun or npm.
 
 Services will be available at:
 - Frontend: http://localhost:3000
@@ -92,18 +96,18 @@ Frontend deployment env vars live in the deployment target or `web/.env.local` w
 ## Commands
 
 ```bash
-bun run dev          # Start both frontend and backend
-bun run doctor       # Shared repo checks for any mode
-bun run doctor:local # Local Python-backed checks, including required env values
-bun run backend      # Backend only (port 8000)
-bun run frontend     # Frontend only (port 3000)
-bun run build        # Build frontend for production
-bun run verify       # Verify the single-target web deployment path
-bun run verify:local # Verify backend compile + FastAPI app proxy smoke with the real route layer + web build
-bun run verify:web   # Run web route contract checks + web build
-bun run verify:local:fastapi # Smoke-test Next -> FastAPI app for get_config/start/stop
-bun run verify:backend # Compile-check the Python backend
-bun run clean        # Clean build artifacts and venvs
+bun run dev | npm run dev
+bun run doctor | npm run doctor
+bun run doctor:local | npm run doctor:local
+bun run backend | npm run backend
+bun run frontend | npm run frontend
+bun run build | npm run build
+bun run verify | npm run verify
+bun run verify:local | npm run verify:local
+bun run verify:web | npm run verify:web
+bun run verify:local:fastapi | npm run verify:local:fastapi
+bun run verify:backend | npm run verify:backend
+bun run clean | npm run clean
 ```
 
 ## Project Structure
@@ -125,7 +129,7 @@ bun run clean        # Clean build artifacts and venvs
 | Auth errors | `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` correct in `.env.local`? |
 | Agent fails to start | Confirm Agora managed provider access is enabled for this project, then check logs at http://localhost:8000/docs |
 | Frontend can't reach backend | If running local Python mode, confirm `AGENT_BACKEND_URL=http://localhost:8000` is set via the root frontend scripts |
-| `bun install` did not update the web app | Run it from the repo root; this repo uses a Bun workspace rooted here |
+| Dependencies did not update the web app | Run `bun install` or `npm install` from the repo root so the workspace dependencies stay aligned |
 | Deployed web app returns API auth errors | Confirm `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` are set in the deployment target and `AGENT_BACKEND_URL` is not pointing to localhost |
 | Unsure which service owns `/api/*` | Local dev: Next route handlers proxy to FastAPI. Deployment: Next route handlers handle requests directly unless `AGENT_BACKEND_URL` is set |
 
@@ -136,6 +140,9 @@ Run the mode-appropriate command from the repo root after changes:
 ```bash
 bun run verify:web
 bun run verify:local
+# or
+npm run verify:web
+npm run verify:local
 ```
 
 When working inside `web` as a standalone deployable app:
@@ -144,6 +151,9 @@ When working inside `web` as a standalone deployable app:
 cd web
 bun run doctor
 bun run verify
+# or
+npm run doctor
+npm run verify
 ```
 
 Useful narrower checks:
@@ -155,6 +165,13 @@ bun run verify:web
 bun run verify:local:fastapi
 bun run verify:web:proxy
 bun run verify:backend
+# or
+npm run doctor
+npm run doctor:local
+npm run verify:web
+npm run verify:local:fastapi
+npm run verify:web:proxy
+npm run verify:backend
 ```
 
 ## Documentation

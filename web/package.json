@@ -2,14 +2,14 @@
   "name": "agora-conversational-ai-demo",
   "version": "1.0.0",
   "scripts": {
-    "doctor": "bun run scripts/doctor.ts",
+    "doctor": "bash ../scripts/run-ts.sh scripts/doctor.ts",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "verify:api": "bun run scripts/verify-api-contracts.ts",
-    "verify": "bun run doctor && bun run verify:api && bun run build"
+    "verify:api": "bash ../scripts/run-ts.sh scripts/verify-api-contracts.ts",
+    "verify": "bash ../scripts/run-ts.sh scripts/doctor.ts && bash ../scripts/run-ts.sh scripts/verify-api-contracts.ts && next build"
   },
   "dependencies": {
     "agora-agent-client-toolkit": "1.2.0",

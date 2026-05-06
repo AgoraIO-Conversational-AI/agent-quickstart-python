@@ -1,3 +1,5 @@
+import { spawn, spawnSync } from 'node:child_process'
+import { once } from 'node:events'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
@@ -7,35 +9,6 @@ import { GET as getConfig } from '../app/api/get_config/route'
 import { POST as startAgent } from '../app/api/v2/startAgent/route'
 import { POST as stopAgent } from '../app/api/v2/stopAgent/route'
 
-type BunRuntime = typeof globalThis & {
-  Bun: {
-    sleep: (ms: number) => Promise<void>
-    spawn: (options: {
-      cmd: string[]
-      cwd: string
-      env: Record<string, string | undefined>
-      stdout: 'ignore'
-      stderr: 'pipe'
-    }) => {
-      kill: () => void
-      exited: Promise<number>
-      exitCode: number | null
-      stderr: ReadableStream<Uint8Array> | null
-    }
-    spawnSync: (options: {
-      cmd: string[]
-      cwd: string
-      stderr: 'pipe'
-      stdout: 'ignore'
-    }) => {
-      exitCode: number
-      stderr: { toString: () => string }
-    }
-  }
-}
-
-const bunRuntime = globalThis as BunRuntime
-
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new Error(message)
@@ -44,6 +17,10 @@ function assert(condition: unknown, message: string): asserts condition {
 
 function getJson(response: Response) {
   return response.json() as Promise<Record<string, unknown>>
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 async function waitForHealthyBackend(baseUrl: string, timeoutMs: number) {
@@ -61,7 +38,7 @@ async function waitForHealthyBackend(baseUrl: string, timeoutMs: number) {
       lastError = error instanceof Error ? error.message : String(error)
     }
 
-    await bunRuntime.Bun.sleep(250)
+    await sleep(250)
   }
 
   throw new Error(`Timed out waiting for FastAPI backend: ${lastError}`)
@@ -73,19 +50,17 @@ async function main() {
   const venvPython = path.join(serverRoot, 'venv', 'bin', 'python')
 
   if (!existsSync(venvPython)) {
-    throw new Error('Missing server/venv/bin/python. Run bun run setup:backend before verify:local.')
+    throw new Error('Missing server/venv/bin/python. Run bun run setup:backend or npm run setup:backend before verify:local.')
   }
 
-  const dependencyCheck = bunRuntime.Bun.spawnSync({
-    cmd: [venvPython, '-c', 'import dotenv, fastapi, uvicorn'],
+  const dependencyCheck = spawnSync(venvPython, ['-c', 'import dotenv, fastapi, uvicorn'], {
     cwd: serverRoot,
-    stderr: 'pipe',
-    stdout: 'ignore',
+    stdio: ['ignore', 'ignore', 'pipe'],
   })
-  if (dependencyCheck.exitCode !== 0) {
-    const stderr = dependencyCheck.stderr.toString().trim()
+  if (dependencyCheck.status !== 0) {
+    const stderr = dependencyCheck.stderr?.toString().trim() ?? ''
     throw new Error(
-      `The backend virtualenv is missing required packages. Run bun run setup:backend before verify:local.${stderr ? ` Python said: ${stderr}` : ''}`,
+      `The backend virtualenv is missing required packages. Run bun run setup:backend or npm run setup:backend before verify:local.${stderr ? ` Python said: ${stderr}` : ''}`,
     )
   }
 
@@ -93,8 +68,7 @@ async function main() {
   const backendUrl = `http://127.0.0.1:${port}`
   const originalBackendUrl = process.env.AGENT_BACKEND_URL
 
-  const serverProcess = bunRuntime.Bun.spawn({
-      cmd: [venvPython, 'scripts/run_fake_server.py'],
+  const serverProcess = spawn(venvPython, ['scripts/run_fake_server.py'], {
     cwd: serverRoot,
     env: {
       ...process.env,
@@ -102,8 +76,11 @@ async function main() {
       AGORA_APP_CERTIFICATE: 'fedcba9876543210fedcba9876543210',
       PORT: String(port),
     },
-    stdout: 'ignore',
-    stderr: 'pipe',
+    stdio: ['ignore', 'ignore', 'pipe'],
+  })
+  let stderr = ''
+  serverProcess.stderr?.on('data', (chunk) => {
+    stderr += chunk.toString()
   })
 
   try {
@@ -162,13 +139,9 @@ async function main() {
     }
 
     serverProcess.kill()
-    await serverProcess.exited
-
-    if (serverProcess.exitCode && serverProcess.exitCode !== 0) {
-      const stderr = await new Response(serverProcess.stderr).text()
-      if (stderr.trim()) {
-        console.error(stderr.trim())
-      }
+    const [exitCode] = await once(serverProcess, 'exit')
+    if (exitCode && stderr.trim()) {
+      console.error(stderr.trim())
     }
   }
 }

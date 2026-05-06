@@ -1,3 +1,4 @@
+import { createServer } from 'node:http'
 import { NextRequest } from 'next/server'
 
 import { GET as getConfig } from '../app/api/get_config/route'
@@ -20,20 +21,12 @@ type LocalServer = {
 }
 
 async function withStubBackend<T>(run: (baseUrl: string) => Promise<T>) {
-  const bunRuntime = globalThis as typeof globalThis & {
-    Bun: {
-      serve: (options: {
-        port: number
-        fetch: (request: Request) => Promise<Response> | Response
-      }) => LocalServer
-    }
-  }
+  const httpServer = createServer((req, res) => {
+    const url = new URL(req.url ?? '/', 'http://127.0.0.1')
 
-  const handler = async (request: Request) => {
-    const url = new URL(request.url)
-
-    if (request.method === 'GET' && url.pathname === '/get_config') {
-      return Response.json({
+    if (req.method === 'GET' && url.pathname === '/get_config') {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({
         code: 0,
         data: {
           app_id: 'stub-app-id',
@@ -43,44 +36,63 @@ async function withStubBackend<T>(run: (baseUrl: string) => Promise<T>) {
           agent_uid: '9999',
         },
         msg: 'success',
+      }))
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/v2/startAgent') {
+      const chunks: Buffer[] = []
+      req.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
+      req.on('end', () => {
+        const parsedBody = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { rtcUid?: number; userUid?: number }
+        if (parsedBody.rtcUid !== 9999 || parsedBody.userUid !== 4321) {
+          res.writeHead(400, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ detail: 'unexpected proxied payload' }))
+          return
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({
+          code: 0,
+          data: {
+            agent_id: 'agent-proxied',
+            channel_name: 'proxy-channel',
+            status: 'started',
+          },
+          msg: 'success',
+        }))
       })
+      return
     }
 
-    if (request.method === 'POST' && url.pathname === '/v2/startAgent') {
-      const parsedBody = await request.json() as { rtcUid?: number; userUid?: number }
-      if (parsedBody.rtcUid !== 9999 || parsedBody.userUid !== 4321) {
-        return Response.json({ detail: 'unexpected proxied payload' }, { status: 400 })
-      }
-
-      return Response.json({
-        code: 0,
-        data: {
-          agent_id: 'agent-proxied',
-          channel_name: 'proxy-channel',
-          status: 'started',
-        },
-        msg: 'success',
-      })
+    if (req.method === 'POST' && url.pathname === '/v2/stopAgent') {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ code: 0, msg: 'success' }))
+      return
     }
 
-    if (request.method === 'POST' && url.pathname === '/v2/stopAgent') {
-      return Response.json({ code: 0, msg: 'success' })
-    }
+    res.writeHead(404, { 'Content-Type': 'text/plain' })
+    res.end('not found')
+  })
 
-    return new Response('not found', { status: 404 })
-  }
+  await new Promise<void>((resolve, reject) => {
+    httpServer.once('error', reject)
+    httpServer.listen(0, '127.0.0.1', () => {
+      httpServer.off('error', reject)
+      resolve()
+    })
+  })
 
-  let server: LocalServer | null = null
-  const startPort = 43100
-  for (let port = startPort; port < startPort + 20; port += 1) {
-    try {
-      server = bunRuntime.Bun.serve({ port, fetch: handler })
-      break
-    } catch {}
-  }
-
-  if (!server) {
+  const address = httpServer.address()
+  if (!address || typeof address === 'string') {
     throw new Error('Failed to start stub backend on a local port')
+  }
+
+  const server: LocalServer = {
+    port: address.port,
+    stop: () => {
+      httpServer.close()
+    },
   }
 
   try {

@@ -64,6 +64,10 @@ From the repo root:
 bun run backend
 bun run doctor:local
 bun run verify:backend
+# or
+npm run backend
+npm run doctor:local
+npm run verify:backend
 ```
 
 From `server/` directly:
