@@ -101,31 +101,52 @@ Useful references:
 
 ---
 
-## 3) Configure ngrok for the Local App
+## 3) Configure ngrok URLs
 
-After the quickstart is running locally, expose the local Next app on port `3000` with ngrok. In local development, the browser calls `/api/*` on the Next app, and those route handlers proxy to the Python backend through `AGENT_BACKEND_URL=http://localhost:8000`.
+After the quickstart is running locally, use ngrok for two separate jobs:
+
+- Share the **web demo** by exposing the local Next app on port `3000`.
+- Connect the **R1 device** by exposing the local Python backend on port `8000`.
+
+Keep the URLs separate. The frontend URL is for humans opening the demo in a browser. The backend URL is the `--server-url` value you will compile into the R1 firmware.
 
 Get your ngrok auth token first:
 
 ![Copy ngrok auth token](./.github/workshop/images/0783dd7d-f647-49cb-aa31-923aac9d346f.png)
 
-In a second terminal, authenticate ngrok and start the tunnel:
+In a second terminal, authenticate ngrok:
 
 ```bash
 ngrok config add-authtoken <YOUR_AUTH_TOKEN>
+```
+
+### Share the Web Demo
+
+Use this when you want someone else to open the browser UI:
+
+```bash
 ngrok http 3000
 ```
 
-Copy the HTTPS forwarding URL:
+Copy the HTTPS forwarding URL and treat it as `YOUR_FRONTEND_NGROK_URL`:
 
 ![ngrok forwarding URL](./.github/workshop/images/645b7270-d503-4464-90ce-aa46f7da5d3a.png)
 
-Use this single HTTPS forwarding URL for the workshop app. It exposes both the frontend and the `/api/*` routes that proxy to the local backend.
+### Expose the Backend for R1
+
+Use this for the hardware device protocol:
+
+```bash
+ngrok http 8000
+```
+
+Copy this HTTPS forwarding URL and treat it as `YOUR_BACKEND_NGROK_URL`. This is the value to pass as `--server-url` later.
 
 Checkpoint before continuing:
-- Open the ngrok HTTPS URL in your browser and confirm it loads the same app as `http://localhost:3000`.
-- Use this ngrok URL as `YOUR_NGROK_URL` later in the firmware setup.
-- Do not use `localhost`, `http://localhost:8000`, or the ngrok tunnel for port `8000` as the firmware server URL.
+- Open `YOUR_FRONTEND_NGROK_URL` in your browser and confirm it loads the same app as `http://localhost:3000`.
+- Open `YOUR_BACKEND_NGROK_URL/get_config` and confirm it returns JSON for the IoT device protocol.
+- Use `YOUR_BACKEND_NGROK_URL` later in the firmware setup.
+- Do not use `localhost`, `http://localhost:3000`, or `YOUR_FRONTEND_NGROK_URL` as the firmware server URL.
 
 ---
 
@@ -195,17 +216,17 @@ After the Codespace opens:
      https://raw.githubusercontent.com/AgoraIO-Conversational-AI/agent-quickstart-python/r1-workshop/.github/workshop/bk_aidk_codespaces_setup.sh
    ```
 
-6. In the Codespaces terminal, make the script executable and run it. For **Agent service address**, pass the **`--server-url`** value: use the **public HTTPS URL** from your ngrok tunnel in [step 3](#3-configure-ngrok-for-the-local-app) (no trailing slash unless your firmware expects it). Use the on-site **2.4G Wi-Fi** SSID and password where prompted.
+6. In the Codespaces terminal, make the script executable and run it. For **Agent service address**, pass the **`--server-url`** value: use `YOUR_BACKEND_NGROK_URL` from [step 3](#3-configure-ngrok-urls) (no trailing slash unless your firmware expects it). Use the on-site **2.4G Wi-Fi** SSID and password where prompted.
 
    ```bash
    chmod +x bk_aidk_codespaces_setup.sh
    ./bk_aidk_codespaces_setup.sh \
      --ssid "YOUR_WIFI_SSID" \
      --password "YOUR_WIFI_PASSWORD" \
-     --server-url "YOUR_NGROK_URL"
+     --server-url "YOUR_BACKEND_NGROK_URL"
    ```
 
-   Replace `YOUR_WIFI_*` with the workshop Wi-Fi credentials. Replace `YOUR_NGROK_URL` with the full public HTTPS forwarding URL from ngrok, for example `https://abc123.ngrok-free.app`.
+   Replace `YOUR_WIFI_*` with the workshop Wi-Fi credentials. Replace `YOUR_BACKEND_NGROK_URL` with the full public HTTPS forwarding URL from `ngrok http 8000`, for example `https://abc123.ngrok-free.app`.
 
    Do not commit Wi-Fi credentials, generated config, or firmware-specific secrets back to GitHub.
 
@@ -299,8 +320,9 @@ Confirm all items below:
 - local services start without backend/credential errors
 - `http://localhost:3000` loads the web app
 - `http://localhost:3000/api/get_config` returns JSON
-- ngrok tunnel is online and its HTTPS URL loads the web app
-- `bk_aidk_codespaces_setup.sh` was run with the workshop Wi-Fi and `YOUR_NGROK_URL`
+- frontend ngrok tunnel is online and its HTTPS URL loads the web app
+- backend ngrok tunnel is online and `YOUR_BACKEND_NGROK_URL/get_config` returns JSON
+- `bk_aidk_codespaces_setup.sh` was run with the workshop Wi-Fi and `YOUR_BACKEND_NGROK_URL`
 - firmware build completes and produces `all-app.bin`
 - board is detected on a valid serial port
 - flash process completes successfully
@@ -313,7 +335,8 @@ Confirm all items below:
 
 - **No serial device shown**: reconnect USB, close apps that lock serial ports, retry BK tool.
 - **Flash hangs at reset/check**: manually press reset button on the board and retry.
-- **No tunnel URL**: verify ngrok auth token and restart `ngrok http 3000`.
+- **No frontend tunnel URL**: verify ngrok auth token and restart `ngrok http 3000`.
+- **No backend tunnel URL**: verify ngrok auth token and restart `ngrok http 8000`.
 - **Agent does not start**: verify Agora project env is written to `server/.env.local`.
 - **Web cannot reach backend**: ensure local backend is up and port `8000` is free.
 
