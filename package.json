@@ -35,5 +35,14 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "overrides": {
+    "agora-agent-uikit": {
+      "agora-agent-client-toolkit-react": "1.2.0",
+      "agora-agent-client-toolkit": "1.2.0"
+    },
+    "agora-agent-client-toolkit-react": {
+      "agora-agent-client-toolkit": "1.2.0"
+    }
   }
 }
