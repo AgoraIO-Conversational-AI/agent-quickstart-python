@@ -32,9 +32,7 @@ npm install
 
 # 2. Login and connect the demo to Agora
 agora login
-agora project create my-first-voice-agent --feature rtc --feature convoai
-agora project use my-first-voice-agent
-agora project env write server/.env.local --with-secrets
+agora project env write server/.env.local
 
 # 3. Start services
 bun run dev
