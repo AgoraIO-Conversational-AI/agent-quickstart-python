@@ -280,7 +280,7 @@ Reference: [Beken firmware flashing docs](https://docs.bekencorp.com/arminodoc/b
 
 ## 6) Flash Firmware to the Board
 
-You can use either desktop BKFIL or the web flashing flow. If the workshop host provides a specific BKFIL download or web flashing URL, use that version.
+You can use either desktop BKFIL or the web flashing flow. For macOS, download BKFIL here: [BKFIL macOS 4.0.1.25123002](https://agora-packages.s3.us-west-2.amazonaws.com/BKFIL_macos_4.0.1.25123002.zip). If the workshop host provides a different BKFIL download or web flashing URL, use that version.
 
 ### Option A: Desktop BKFIL
 
