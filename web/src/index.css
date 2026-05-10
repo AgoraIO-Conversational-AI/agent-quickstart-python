@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --background: 220 14% 5%;
+  --surface: 220 12% 9%;
+  --surface-elevated: 220 10% 13%;
+  --card: 220 12% 9%;
+  --card-foreground: 220 15% 95%;
+  --popover: 220 10% 13%;
+  --popover-foreground: 220 15% 95%;
+  --muted: 220 12% 9%;
+  --foreground: 220 15% 95%;
+  --muted-foreground: 220 10% 50%;
+  --primary: 194 100% 50%;
+  --primary-foreground: 220 14% 5%;
+  --secondary: 220 10% 13%;
+  --secondary-foreground: 220 15% 95%;
+  --accent: 194 100% 50%;
+  --accent-foreground: 220 14% 5%;
+  --destructive: 0 72% 58%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 10% 18%;
+  --input: 220 10% 18%;
+  --ring: 194 100% 50%;
+  --radius: 0.5rem;
+  --viz-stop-1: 194 100% 58%;
+  --viz-stop-2: 215 42% 72%;
+  --viz-stop-3: 272 62% 72%;
+  --font-sans: "Instrument Sans", "Inter", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-up-d1 {
+  animation-delay: 60ms;
+}
+
+.animate-fade-up-d2 {
+  animation-delay: 120ms;
+}
+
+.animate-fade-up-d3 {
+  animation-delay: 180ms;
+}
+
+#chatbox {
+  width: 24rem !important;
+  left: auto !important;
+  bottom: 8rem !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+#chatbox:has(> .chatbox.expanded) {
+  background-color: hsl(var(--card) / 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.75rem !important;
+}
+
+#chatbox:not(:has(> .chatbox.expanded)) {
+  display: flex !important;
+  justify-content: flex-end !important;
+}
+
+#chatbox button[aria-label="Open transcription"] {
+  border: none !important;
+}
+
+#chatbox .chatbox.expanded {
+  background-color: transparent !important;
+}
+
+#chatbox .chatbox.expanded h3,
+#chatbox .chatbox.expanded button[aria-label="Close transcription"] {
+  color: hsl(var(--foreground)) !important;
+}
+
+#chatbox .flex.w-full.items-start.gap-2.flex-row > div.flex.h-8.w-8.flex-shrink-0 {
+  box-sizing: border-box !important;
+  background-color: hsl(var(--primary) / 0.15) !important;
+  border: 2px solid hsl(var(--primary)) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+#chatbox .flex.w-full.items-start.gap-2.flex-row > .flex.flex-col > .rounded-\[15px\] {
+  color: hsl(var(--primary)) !important;
+}
+
+#chatbox .flex.w-full.items-start.gap-2.flex-row > .flex.flex-col > .rounded-\[15px\] *,
+#chatbox .flex.w-full.items-start.gap-2.flex-row-reverse > .flex.flex-col > .rounded-\[15px\] * {
+  color: inherit !important;
+}
+
+#chatbox .flex.w-full.items-start.gap-2.flex-row-reverse > div.flex.h-8.w-8.flex-shrink-0 {
+  box-sizing: border-box !important;
+  background-color: hsl(var(--muted)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+#chatbox .flex.w-full.items-start.gap-2.flex-row-reverse > .flex.flex-col > .rounded-\[15px\] {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.chatbox {
+  height: 300px;
+  transition: height 0.3s ease-in-out;
+}
+
+.chatbox.expanded {
+  height: 600px;
+  overflow: hidden;
+}
+
+.chatbox.expanded > div:last-child {
+  min-height: 0;
+}
+
+.conversation-mic-host {
+  flex-shrink: 0;
+}
+
+.conversation-mic-host > button {
+  aspect-ratio: 1 / 1;
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
+  min-height: 3rem;
+  max-width: 3rem;
+  max-height: 3rem;
+  border-radius: 9999px;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+@media (min-width: 640px) {
+  .conversation-mic-host > button {
+    width: 3.5rem;
+    height: 3.5rem;
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    max-width: 3.5rem;
+    max-height: 3.5rem;
+  }
+}

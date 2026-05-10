@@ -1,0 +1,32 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="420" rx="24" fill="#F8FAFC"/>
+  <text x="72" y="66" fill="#0F172A" font-family="Arial, sans-serif" font-size="28" font-weight="700">Shared Runtime Flow</text>
+  <text x="72" y="94" fill="#475569" font-family="Arial, sans-serif" font-size="16">Local and deployed modes share the same browser-facing path.</text>
+
+  <rect x="72" y="160" width="190" height="92" rx="18" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+  <text x="167" y="196" text-anchor="middle" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="24" font-weight="700">Browser</text>
+  <text x="167" y="222" text-anchor="middle" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="17">RTC + RTM client</text>
+
+  <rect x="335" y="160" width="190" height="92" rx="18" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
+  <text x="430" y="196" text-anchor="middle" fill="#14532D" font-family="Arial, sans-serif" font-size="24" font-weight="700">Next.js</text>
+  <text x="430" y="222" text-anchor="middle" fill="#14532D" font-family="Arial, sans-serif" font-size="17">/api/* routes</text>
+
+  <rect x="598" y="160" width="240" height="92" rx="18" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+  <text x="718" y="196" text-anchor="middle" fill="#7C2D12" font-family="Arial, sans-serif" font-size="24" font-weight="700">FastAPI Backend</text>
+  <text x="718" y="222" text-anchor="middle" fill="#7C2D12" font-family="Arial, sans-serif" font-size="17">token + agent lifecycle</text>
+
+  <rect x="861" y="160" width="267" height="92" rx="18" fill="#FCE7F3" stroke="#DB2777" stroke-width="2"/>
+  <text x="994" y="192" text-anchor="middle" fill="#831843" font-family="Arial, sans-serif" font-size="24" font-weight="700">Agora Cloud</text>
+  <text x="994" y="218" text-anchor="middle" fill="#831843" font-family="Arial, sans-serif" font-size="17">managed agent joins the channel</text>
+
+  <line x1="262" y1="206" x2="335" y2="206" stroke="#475569" stroke-width="4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <line x1="525" y1="206" x2="598" y2="206" stroke="#475569" stroke-width="4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <line x1="798" y1="206" x2="861" y2="206" stroke="#475569" stroke-width="4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+  <text x="994" y="300" text-anchor="middle" fill="#475569" font-family="Arial, sans-serif" font-size="18">Agent audio and transcript events flow back through RTC and RTM.</text>
+</svg>
