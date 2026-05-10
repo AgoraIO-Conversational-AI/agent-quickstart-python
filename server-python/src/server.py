@@ -63,6 +63,7 @@ class StartAgentRequest(BaseModel):
     channelName: str
     rtcUid: str
     userUid: str
+    parameters: dict | None = None
 
 
 class StopAgentRequest(BaseModel):
@@ -132,6 +133,7 @@ def start_agent(request: StartAgentRequest):
             channel_name=request.channelName,
             agent_uid=request.rtcUid,
             user_uid=request.userUid,
+            output_audio_codec=(request.parameters or {}).get("output_audio_codec"),
         )
         return {"code": 0, "msg": "success", "data": result}
     except Exception as e:

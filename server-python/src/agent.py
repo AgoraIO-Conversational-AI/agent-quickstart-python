@@ -39,7 +39,8 @@ class Agent:
         self,
         channel_name: str,
         agent_uid: str,
-        user_uid: str
+        user_uid: str,
+        output_audio_codec: str | None = None,
     ) -> Dict[str, Any]:
         """Start agent with the same default vendor chain as the Next.js quickstart."""
         if not channel_name or not str(channel_name).strip():
@@ -87,13 +88,17 @@ class Agent:
         #     voice_id=os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
         # )
         
+        parameters = {"data_channel": "rtm", "enable_error_message": True}
+        if output_audio_codec:
+            parameters["output_audio_codec"] = output_audio_codec
+
         agora_agent = AgoraAgent(
             name=name,
             instructions="You are a helpful AI assistant.",
             greeting="Hello! I am your AI assistant. How can I help you?",
             failure_message="I'm sorry, I'm having trouble processing your request.",
             advanced_features={"enable_rtm": True},
-            parameters={"data_channel": "rtm", "enable_error_message": True},
+            parameters=parameters,
         )
         
         agora_agent = (
