@@ -523,6 +523,6 @@ token = TokenBuilder.generate(
 
 ## Reference Files
 
-- `server-python/src/agent.py` - Complete implementation
-- `server-python/src/server.py` - FastAPI integration example
+- `server/src/agent.py` - Complete implementation
+- `server/src/server.py` - FastAPI integration example
 - [agora-rest-client-python](https://pypi.org/project/agora-rest-client-python/) - SDK documentation

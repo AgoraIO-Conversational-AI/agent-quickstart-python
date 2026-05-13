@@ -1,6 +1,6 @@
 # Web Client Agent Guide
 
-Use this guide when changing files under `web-client/`.
+Use this guide when changing files under `web/`.
 
 ## Current Stack
 
@@ -42,7 +42,7 @@ Use this guide when changing files under `web-client/`.
 
 ### Deployment
 
-- Deploy `web-client` as the app root
+- Deploy `web` as the app root
 - The same route handlers run in-process and generate config or start/stop agents directly
 
 ## Working Rules
@@ -71,7 +71,7 @@ bun run verify:local:fastapi
 
 `bun run verify:local:fastapi` boots the FastAPI app and checks the Next proxy path against its real routes, but swaps in a fake agent implementation so the smoke test stays fast and deterministic.
 
-From `web-client/` directly:
+From `web/` directly:
 
 ```bash
 bun run doctor

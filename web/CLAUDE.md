@@ -2,7 +2,7 @@
 
 Use [AGENTS.md](./AGENTS.md) as the source of truth for this module.
 
-The only Claude-specific note here is that `web-client` supports two valid runtime shapes:
+The only Claude-specific note here is that `web` supports two valid runtime shapes:
 
 - local development, where Next `/api/*` handlers proxy to FastAPI through `AGENT_BACKEND_URL`
 - deployment, where those same route handlers run in-process

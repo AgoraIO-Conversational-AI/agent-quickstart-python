@@ -43,7 +43,7 @@ This module owns the browser experience and the web-facing `/api/*` entrypoints.
 │       └── utils.ts         # Common utility functions
 │
 ├── app/api/                 # Route handlers for quick Vercel deployment
-├── ../server-python/        # Backend service (project root level)
+├── ../server/        # Backend service (project root level)
 │   ├── src/
 │   │   ├── server.py        # FastAPI entry, route definitions
 │   │   └── agent.py         # Agent class using agora-agent-server-sdk
@@ -145,7 +145,7 @@ app/api/
     └── stopAgent/route.ts
 
 Optional local backend:
-../server-python/
+../server/
 ├── src/
 │   ├── server.py
 │   └── agent.py
@@ -160,7 +160,7 @@ The same `app/api/**/route.ts` files run directly inside the deployed Next app. 
 
 ## Environment Variables
 
-The web client route handlers can read configuration from `web-client/.env.local` or Vercel project env vars:
+The web client route handlers can read configuration from `web/.env.local` or Vercel project env vars:
 
 | Variable | Description |
 |----------|-------------|

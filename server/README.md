@@ -17,7 +17,7 @@ bun run setup
 Agora credentials:
 
 ```bash
-agora project env write server-python/.env.local
+agora project env write server/.env.local
 ```
 
 Run the app:
@@ -31,10 +31,10 @@ This assumes the Agora CLI is installed and logged in. The command uses the proj
 If you are not using the Agora CLI, create the env file manually and fill in your project values:
 
 ```bash
-cp server-python/.env.example server-python/.env.local
+cp server/.env.example server/.env.local
 ```
 
-From `server-python/`:
+From `server/`:
 
 ### 1. Configure Environment
 

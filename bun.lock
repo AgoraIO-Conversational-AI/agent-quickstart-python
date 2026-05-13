@@ -8,7 +8,7 @@
         "concurrently": "^8.2.2",
       },
     },
-    "web-client": {
+    "web": {
       "name": "agora-conversational-ai-demo",
       "version": "1.0.0",
       "dependencies": {
@@ -255,7 +255,7 @@
 
     "agora-agent-uikit": ["agora-agent-uikit@1.1.0", "", { "dependencies": { "@lottiefiles/dotlottie-react": "^0.17.13", "@radix-ui/react-dialog": "^1.1.15", "@radix-ui/react-dropdown-menu": "^2.1.16", "@radix-ui/react-popover": "^1.1.15", "@radix-ui/react-select": "^2.2.6", "@radix-ui/react-slot": "^1.2.4", "@radix-ui/react-switch": "^1.2.6", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "cmdk": "^1.1.1", "dompurify": "^3.3.3", "lucide-react": ">=0.263.0", "tailwind-merge": "^3.4.0" }, "peerDependencies": { "agora-agent-client-toolkit": "^1.2.0", "agora-agent-client-toolkit-react": "^1.2.0", "agora-rtc-react": ">=2.0.0", "agora-rtm-sdk": ">=2.0.0", "react": ">=18.0.0", "react-dom": ">=18.0.0" }, "optionalPeers": ["agora-agent-client-toolkit", "agora-agent-client-toolkit-react", "agora-rtc-react", "agora-rtm-sdk"] }, "sha512-gDSleHFYavNEqf/SIUt8xA1Q+VAw4M9q/84MD/+fFG7Z15oSLH6hZnmI+8cr6yzPXBBXHX4dd9tRZod5UjaFyA=="],
 
-    "agora-conversational-ai-demo": ["agora-conversational-ai-demo@workspace:web-client"],
+    "agora-conversational-ai-demo": ["agora-conversational-ai-demo@workspace:web"],
 
     "agora-rtc-react": ["agora-rtc-react@2.5.1", "", { "peerDependencies": { "react": ">=16.8" } }, "sha512-ORPbV02p8dZ2GhQxo5kTarc0BYjObc2IeqRPv9mi5/fxDI5nMY6kg54R5fUvLQU05H3Q5Kecq7M2kuZzHfNo5Q=="],
 

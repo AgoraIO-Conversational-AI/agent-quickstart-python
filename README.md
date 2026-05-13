@@ -47,7 +47,7 @@ agora project env write server/.env.local
 bun run dev
 ```
 
-`bun run setup` is run from the repo root and manages the Python virtual environment plus the `web-client` package through the root Bun workspace.
+`bun run setup` is run from the repo root and manages the Python virtual environment plus the `web` package through the root Bun workspace.
 
 Services will be available at:
 
@@ -59,7 +59,7 @@ In local development, the browser still calls `/api/*` on the Next app. Those ro
 
 ## Deployment Env
 
-Deploy `web-client` as a Next.js app. In this mode, the Next route handlers serve these endpoints directly:
+Deploy `web` as a Next.js app. In this mode, the Next route handlers serve these endpoints directly:
 
 - `/api/get_config`
 - `/api/v2/startAgent`
@@ -77,7 +77,7 @@ Do not set `AGENT_BACKEND_URL` in deployment unless you intentionally want the w
 
 Authentication uses Token007 (AccessToken2), generated automatically from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. Vendor credentials are no longer required in local setup; the backend defaults to the same DeepgramSTT + OpenAI + MiniMaxTTS managed configuration used by the current Next.js quickstart.
 
-Frontend deployment env vars live in the deployment target or `web-client/.env.local` when running the web app by itself. The browser does not need its own public Agora credentials in this sample.
+Frontend deployment env vars live in the deployment target or `web/.env.local` when running the web app by itself. The browser does not need its own public Agora credentials in this sample.
 
 ## Commands
 
@@ -108,8 +108,8 @@ bun run clean        # Clean build artifacts and venvs
 
 ```
 .
-├── web-client/       # Frontend — Next.js 16 + React 19 + TypeScript + Agora Web SDK
-├── server-python/    # Backend — Python FastAPI + Agora Agent SDK
+├── web/       # Frontend — Next.js 16 + React 19 + TypeScript + Agora Web SDK
+├── server/    # Backend — Python FastAPI + Agora Agent SDK
 ├── ARCHITECTURE.md   # System architecture and data flow
 └── AGENTS.md         # AI agent development guide
 ```
@@ -136,10 +136,10 @@ bun run verify:web
 bun run verify:local
 ```
 
-When working inside `web-client` as a standalone deployable app:
+When working inside `web` as a standalone deployable app:
 
 ```bash
-cd web-client
+cd web
 bun run doctor
 bun run verify
 ```
@@ -159,8 +159,8 @@ bun run verify:backend
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — System architecture and data flow
 - [AGENTS.md](./AGENTS.md) — AI agent development guide
-- [web-client/](./web-client/) — Frontend details
-- [server-python/](./server-python/) — Backend details
+- [web/](./web/) — Frontend details
+- [server/](./server/) — Backend details
 
 ## License
 

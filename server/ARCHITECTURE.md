@@ -24,7 +24,7 @@ In deployed web mode, the Next app can serve the same API contract directly. Thi
 ## Project Structure
 
 ```
-server-python/
+server/
 ├── src/
 │   ├── server.py           # FastAPI app, routes, CORS
 │   └── agent.py            # Agent lifecycle management
@@ -250,7 +250,7 @@ Frontend Client
 
 ## Integration with Frontend
 
-Frontend connects through Next route handlers in `web-client/app/api`. In local Python mode, those handlers forward to the FastAPI service through `AGENT_BACKEND_URL`:
+Frontend connects through Next route handlers in `web/app/api`. In local Python mode, those handlers forward to the FastAPI service through `AGENT_BACKEND_URL`:
 
 ```
 /api/get_config    → Next route handler → http://localhost:8000/get_config
