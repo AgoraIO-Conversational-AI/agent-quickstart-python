@@ -103,7 +103,11 @@ class Agent:
         #     voice_id=os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
         # )
 
-        parameters = {"data_channel": "rtm", "enable_error_message": True}
+        parameters = {
+            "data_channel": "rtm",
+            "enable_error_message": True,
+            "enable_metrics": True,
+        }
         if isinstance(output_audio_codec, str) and output_audio_codec.strip():
             parameters["output_audio_codec"] = output_audio_codec.strip()
 
