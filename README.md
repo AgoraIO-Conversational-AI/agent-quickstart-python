@@ -1,74 +1,73 @@
-# Agora Conversational AI Web Demo
+# Agora Conversational AI Python Quickstart
 
-Real-time voice conversation with AI agents, featuring the Agora UIKit transcript experience. The Next.js web app owns the browser UI, while the Python FastAPI service owns token generation and agent lifecycle APIs.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.8-blue)](https://www.python.org/)
+[![Bun](https://img.shields.io/badge/bun-latest-black)](https://bun.sh/)
 
-## Architecture
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./.github/images/system-architecture-dark.svg">
-  <img src="./.github/images/system-architecture.svg" alt="System architecture" />
-</picture>
+Build a production-style voice agent with a Next.js web client and Python FastAPI backend. This quickstart includes live transcript, agent visualizer ([Agent UIKit](https://agoraio-conversational-ai.github.io/agent-uikit/)), and managed STT/LLM/TTS defaults.
 
 ## Prerequisites
 
 - [Python 3.8+](https://www.python.org/)
-- [Bun](https://bun.sh/) (package manager & script runner)
+- [Bun](https://bun.sh/)
 - [Agora CLI](https://github.com/AgoraIO/cli)
 
-## Quick Start
+## Run It
 
-### Official CLI Flow
+Install the CLI (skip if already installed), scaffold the Python quickstart, install dependencies, and run.
 
-Use the Agora CLI when starting fresh. It clones the Python starter, binds an Agora project, and writes the env file.
+1. **Install the Agora CLI and sign in** (skip if `agora` is already on your PATH):
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AgoraIO/cli/main/install.sh | sh -s -- --add-to-path
-agora login
-agora init my-python-demo --template python
-cd my-python-demo
-bun setup
-bun run dev
-```
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/AgoraIO/cli/main/install.sh | sh -s -- --add-to-path
+   agora login
+   ```
 
-Open http://localhost:3000 and click **Start conversation**.
+2. **Scaffold and run** (replace `my-python-demo` with your own project name):
 
-If the agent does not join or transcripts do not appear, run `agora project doctor --deep` to check credentials, feature enablement, network reachability, and local env binding.
+   ```bash
+   agora init my-python-demo --template python
+   cd my-python-demo
+   bun run setup
+   bun run dev
+   ```
 
-### Working from a Clone of This Repository
+3. Open [http://localhost:3000](http://localhost:3000) and click **Start conversation**.
+
+If the agent does not join or transcripts do not appear, run **`agora project doctor --deep`** to check credentials, feature enablement, network reachability, and local env binding.
+
+### Working from a clone of this repository
 
 Use this path if you already cloned **this** repo:
 
 ```bash
+git clone https://github.com/AgoraIO-Conversational-AI/agent-quickstart-python.git
+cd agent-quickstart-python
+agora login
+agora project use <your-project>
 bun run setup
 agora project env write server/.env.local
+bun run doctor:local
 bun run dev
 ```
 
-`bun run setup` is run from the repo root and manages the Python virtual environment plus the `web` package through the root Bun workspace.
+Services:
 
-Services will be available at:
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+- API docs: `http://localhost:8000/docs`
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+## Deploy
 
-The browser calls `/api/*` on the Next app. Next rewrites those requests to the FastAPI backend through `AGENT_BACKEND_URL=http://localhost:8000`, which the root scripts set automatically.
+Deploy `web` as a Next.js app and `server` as a reachable Python service.
 
-## Deployment Env
-
-Deploy `web` as a Next.js app alongside a reachable Python FastAPI service. Next rewrites these browser-facing endpoints to the Python backend:
-
-- `/api/get_config`
-- `/api/startAgent`
-- `/api/stopAgent`
-
-Set this env var in the web deployment target:
+Browser-facing `/api/*` routes in Next proxy to FastAPI via:
 
 ```bash
 AGENT_BACKEND_URL=https://your-python-backend.example.com
 ```
 
-Set Agora credentials on the Python backend:
+Set backend env values:
 
 ```bash
 AGORA_APP_ID=your_agora_app_id
@@ -76,93 +75,94 @@ AGORA_APP_CERTIFICATE=your_agora_app_certificate
 AGENT_GREETING=optional_custom_greeting
 ```
 
-Authentication uses Token007 (AccessToken2), generated automatically from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. Vendor credentials are no longer required in local setup; the backend defaults to the same DeepgramSTT + OpenAI + MiniMaxTTS managed configuration used by the current Next.js quickstart.
+To export local env values from the Agora CLI-bound project:
 
-Frontend deployment env vars live in the deployment target or `web/.env.local` when running the web app by itself. The browser does not need its own public Agora credentials in this sample.
+```bash
+agora project use <your-project>
+agora project env write server/.env.local
+rg "^(AGORA_APP_ID|AGORA_APP_CERTIFICATE)=" server/.env.local
+```
+
+## Environment variables
+
+Primary backend env file: [`server/.env.example`](server/.env.example).
+
+| Variable | Required | Default | Notes |
+| --- | :---: | :---: | --- |
+| `AGORA_APP_ID` | ✅ | — | Agora Console -> Project -> App ID |
+| `AGORA_APP_CERTIFICATE` | ✅ | — | Agora Console -> Project -> App Certificate (server only) |
+| `AGENT_GREETING` |  | built-in greeting | Optional opening line override |
+| `PORT` |  | `8000` | FastAPI server port |
+| `AGENT_BACKEND_URL` (web deploy) | ✅ | — | Required in deployed `web` app when proxying to external FastAPI |
+
+> **Default vs BYOK** — this quickstart defaults to Agora-managed STT + LLM + TTS in the backend. Enable BYOK by uncommenting provider blocks in `server/src/agent.py` and adding matching keys.
 
 ## Commands
 
-Recommended daily commands:
-
 ```bash
-bun run setup       # install/refresh backend and frontend dependencies
-bun run dev         # start both frontend and backend
-```
+# Dev
+bun run setup
+bun run dev
 
-Additional commands:
+# Quality
+bun run doctor
+bun run doctor:local
+bun run verify:backend
 
-```bash
-bun run doctor       # Shared repo checks for any mode
-bun run doctor:local # Local Python-backed checks, including required env values
-bun run backend      # Backend only (port 8000)
-bun run frontend     # Frontend only (port 3000)
-bun run build        # Build frontend for production
-bun run verify       # Verify the web proxy contract and web build
-bun run verify:local # Verify backend compile + FastAPI app proxy smoke with the real route layer + web build
-bun run verify:web   # Run web route contract checks + web build
-bun run verify:local:fastapi # Smoke-test Next -> FastAPI app for get_config/start/stop
-bun run verify:backend # Compile-check the Python backend
-bun run clean        # Clean build artifacts and venvs
-```
-
-## Project Structure
-
-```
-.
-├── web/       # Frontend — Next.js 16 + React 19 + TypeScript + Agora Web SDK
-├── server/    # Backend — Python FastAPI + Agora Agent SDK
-├── ARCHITECTURE.md   # System architecture and data flow
-└── AGENTS.md         # AI agent development guide
-```
-
-## Troubleshooting
-
-| Problem                                  | Check                                                                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Connection issues                        | Backend running on port 8000?                                                                                                               |
-| Agora credentials not written yet        | Run `agora project env write server/.env.local`.                                                                                            |
-| Auth errors                              | Run `agora project doctor --deep` and confirm `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` are present in `server/.env.local`.                |
-| Agent fails to start                     | Run `agora project doctor --deep`, then check logs at http://localhost:8000/docs.                                                           |
-| Frontend can't reach backend             | Confirm `AGENT_BACKEND_URL=http://localhost:8000` is set via the root frontend scripts or deployment target                                  |
-| `bun install` did not update the web app | Run it from the repo root; this repo uses a Bun workspace rooted here                                                                       |
-| Deployed web app returns API auth errors | Confirm `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` are set on the Python backend and `AGENT_BACKEND_URL` is not pointing to localhost       |
-| Unsure which service owns `/api/*`       | Next owns the browser-facing `/api/*` URLs; FastAPI owns the actual `/get_config`, `/startAgent`, and `/stopAgent` implementations          |
-
-## Verification
-
-Run the mode-appropriate command from the repo root after changes:
-
-```bash
+# CI / pre-ship
 bun run verify:web
 bun run verify:local
-```
-
-When working inside `web` as a standalone deployable app:
-
-```bash
-cd web
-bun run doctor
 bun run verify
 ```
 
-Useful narrower checks:
+Run `bun run verify` before shipping web-only changes, and `bun run verify:local` when backend behavior changed.
 
-```bash
-bun run doctor
-bun run doctor:local
-bun run verify:web
-bun run verify:local:fastapi
-bun run verify:web:proxy
-bun run verify:backend
-```
+## Architecture
 
-## Documentation
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./.github/images/system-architecture-dark.svg">
+  <img src="./.github/images/system-architecture.svg" alt="System architecture">
+</picture>
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — System architecture and data flow
-- [AGENTS.md](./AGENTS.md) — AI agent development guide
-- [web/](./web/) — Frontend details
-- [server/](./server/) — Backend details
+The browser talks to Next.js `/api/*` routes. In local mode, Next rewrites those routes to FastAPI using `AGENT_BACKEND_URL=http://localhost:8000`; FastAPI owns token generation and agent start/stop logic.
+
+## What You Get
+
+- Next.js web client (`web/`) with transcript UI and agent visualizer
+- FastAPI backend (`server/`) for token generation and agent lifecycle
+- `/api/get_config`, `/api/startAgent`, and `/api/stopAgent` browser-facing contract
+- Managed default pipeline (Deepgram STT, OpenAI LLM, MiniMax TTS)
+
+## How It Works
+
+1. Browser requests connection config from `/api/get_config`.
+2. Backend generates combined RTC+RTM config and returns channel + token.
+3. Browser joins RTC/RTM and starts streaming audio.
+4. Browser calls `/api/startAgent`; backend starts the cloud agent session.
+5. Browser receives transcript and state updates over RTM, and `/api/stopAgent` ends the session.
+
+## Repo Map
+
+- `web/` — Next.js 16 + React 19 + TypeScript frontend
+- `server/` — Python FastAPI backend + Agora Agent Server SDK integration
+- `ARCHITECTURE.md` — system-level flow and ownership boundaries
+- `AGENTS.md` — contributor agent instructions
+
+## Troubleshooting
+
+- **Agent does not join or transcripts are missing:** run `agora project doctor --deep`.
+- **Missing credentials:** run `agora project env write server/.env.local`.
+- **Auth errors from backend:** confirm `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` are set in `server/.env.local`.
+- **Frontend cannot reach backend:** confirm `AGENT_BACKEND_URL=http://localhost:8000` in local frontend scripts.
+- **Unsure who owns `/api/*`:** Next owns browser-facing `/api/*`; FastAPI owns `/get_config`, `/startAgent`, `/stopAgent`.
+
+## More Docs
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [AGENTS.md](./AGENTS.md)
+- [web/ARCHITECTURE.md](./web/ARCHITECTURE.md)
+- [server/ARCHITECTURE.md](./server/ARCHITECTURE.md)
 
 ## License
 
-See [LICENSE](./LICENSE).
+Released under the [MIT License](./LICENSE).
