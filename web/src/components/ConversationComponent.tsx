@@ -148,7 +148,7 @@ export default function ConversationComponent({
 			appid: appId,
 			channel: agoraData.channel,
 			token: agoraData.token,
-			uid: Number.parseInt(agoraData.uid, 10) || 0,
+			uid: Number.parseInt(agoraData.uid, 10),
 		},
 		isReady,
 	);
