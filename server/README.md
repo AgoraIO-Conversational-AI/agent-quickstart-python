@@ -103,9 +103,9 @@ The service will start on port 8000 (or the port specified in `.env.local`).
 
 ## How This Fits The Repo
 
-- Full-stack local development: run `bun run dev` from the repo root. The browser still calls Next `/api/*`, and those route handlers proxy to this FastAPI service.
+- Full-stack local development: run `bun run dev` from the repo root. The browser still calls Next `/api/*`, and Next rewrites those requests to this FastAPI service.
 - Module-local backend work: use the commands in this README when you only need to run or inspect the Python service itself.
-- Single-target web deployment: this Python service is not required unless you intentionally point `AGENT_BACKEND_URL` at an external backend.
+- Deployment: this Python service is required because the web app only forwards API requests through `AGENT_BACKEND_URL`.
 
 ### 4. Test API
 
@@ -114,12 +114,12 @@ The service will start on port 8000 (or the port specified in `.env.local`).
 curl http://localhost:8000/get_config
 
 # Test agent start
-curl -X POST http://localhost:8000/v2/startAgent \
+curl -X POST http://localhost:8000/startAgent \
   -H "Content-Type: application/json" \
   -d '{"channelName": "test_channel", "rtcUid": 123456, "userUid": 789012}'
 
 # Test agent stop (use agent_id from start response)
-curl -X POST http://localhost:8000/v2/stopAgent \
+curl -X POST http://localhost:8000/stopAgent \
   -H "Content-Type: application/json" \
   -d '{"agentId": "your_agent_id"}'
 ```
@@ -127,8 +127,8 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 ## API Endpoints
 
 - `GET /get_config` - Generate connection configuration
-- `POST /v2/startAgent` - Start an agent
-- `POST /v2/stopAgent` - Stop an agent
+- `POST /startAgent` - Start an agent
+- `POST /stopAgent` - Stop an agent
 
 `/get_config` now issues one-hour RTC plus RTM tokens. The web client renews both before expiry, matching the reference Next.js session model.
 
