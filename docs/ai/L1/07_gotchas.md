@@ -23,7 +23,6 @@
 ## Doc / Code Drift
 
 - Per-module `AGENTS.md` / `ARCHITECTURE.md` under `web/` and `server/` were removed. Use repo-root `ARCHITECTURE.md`, `AGENTS.md`, and `docs/ai/L1/` as the maintained entry points.
-- `web/docs/ARCHITECTURE.md` is a generic Vite + Zustand template; it does not describe this Next app.
 - When reconciling older notes with the code, watch for: no `useAgoraConnection` hook (lifecycle is inline in `LandingPage.tsx` / `ConversationComponent.tsx`), Turbopack mentions vs `web/package.json` using `next dev --webpack`, and FastAPI session APIs (`create_async_session`, error mapping via `_to_http_error`) vs outdated snippets.
 
 Until stale copies reappear elsewhere, prefer code + `docs/ai/` as the source of truth.
@@ -46,6 +45,10 @@ Until stale copies reappear elsewhere, prefer code + `docs/ai/` as the source of
 
 `ConversationComponent` skips renewal entirely if `joinedUID` is `0`. If you change UID handling, walk this path end-to-end before merging.
 
+## One Token String, Concrete UID
+
+The quickstart deliberately uses `generate_convo_ai_token` for both RTC and RTM to keep setup simple. That only works after FastAPI has resolved a concrete user UID. Do not pass `0` through to RTM login or RTM renewal.
+
 ## FastAPI Agent Is a Module-Level Singleton (and Holds Sessions)
 
 `server.py` runs `agent = Agent()` at import time. Every request reuses the same instance. Important consequences:
@@ -59,17 +62,17 @@ Until stale copies reappear elsewhere, prefer code + `docs/ai/` as the source of
 
 `server/src/server.py` uses `CORSMiddleware(allow_origins=["*"], allow_credentials=True)`. This is fine for a local quickstart but is **not** appropriate for production. Tighten this before exposing the FastAPI service publicly.
 
-## `loadEnvFiles` Is CWD-Sensitive
+## Env Loading Is File-Relative
 
-`server.py` calls `load_dotenv` for `.env.local` then `.env` from the current working directory. Running `python3 src/server.py` from inside `server/` (which is what `bun run dev:backend` does) finds them. Running from the repo root would silently skip them.
-
-## Missing Static Assets
-
-`web/app/layout.tsx` references favicon PNGs that are not in `web/public/`. Add the files or remove the references; do not silence the resulting 404s.
+`server.py` derives the `server/` directory from `__file__` and loads `server/.env.local` then `server/.env`. Running from the repo root still finds those files; missing `AGORA_APP_ID` or `AGORA_APP_CERTIFICATE` leaves `agent = None` and routes return `500`.
 
 ## `server/scripts/run_fake_server.py` Is for Tests Only
 
 The fake server replaces `Agent` with `FakeAgent` and is started by `verify:local:fastapi`. Do not deploy it — it skips all real Agora calls and accepts any input.
+
+## Server-Side Agent Flags
+
+RTM delivery, tool enablement, metrics, error messages, and data channel settings belong in `server/src/agent.py`. The browser only consumes the resulting events; it should not invent server-side agent parameters.
 
 ## No `Co-Authored-By` in Commit Messages
 

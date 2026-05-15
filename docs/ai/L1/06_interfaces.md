@@ -16,6 +16,8 @@ CORS middleware: `allow_origins=["*"]`, `allow_credentials=True`.
 
 `StartAgentRequest.parameters` is optional — the handler only reads `output_audio_codec` from it today.
 
+`get_config` treats missing, zero, and negative UIDs as "generate a random user UID" and returns the generated value. This keeps the single RTC+RTM token usable for RTM, where `0` is not a valid login subject.
+
 ## Next.js Rewrites
 
 `web/next.config.ts` registers these only when `AGENT_BACKEND_URL` is set:
@@ -72,22 +74,16 @@ agent = (
                           voice_id="English_captivating_female1"))
 )
 
-session = await agent.create_async_session(
-    channel_name=channel_name,
+session = agora_agent.create_async_session(
+    client=self.client,
+    channel=channel_name,
+    agent_uid=str(agent_uid),
     remote_uids=[str(user_uid)],
     enable_string_uid=False,
     idle_timeout=30,
     expires_in=3600,
-    data_channel="rtm",
-    advanced_features={"enable_rtm": True, "enable_tools": True},
-    parameters={
-        "data_channel": "rtm",
-        "enable_error_message": True,
-        "enable_metrics": True,
-    },
-    turn_detection={ /* VAD config */ },
 )
-await session.start()
+agent_id = await session.start()
 ```
 
 ## RTM Event Shapes (Client-Side)

@@ -160,6 +160,15 @@ async function main() {
       'GET /api/get_config should return an agent uid from FastAPI',
     )
 
+    const zeroUidResponse = await requestViaRewrite('/api/get_config?uid=0&channel=python-smoke')
+    const zeroUidBody = await getJson(zeroUidResponse)
+    assert(zeroUidResponse.status === 200, 'GET /api/get_config?uid=0 should proxy to the FastAPI app')
+    const zeroUidData = zeroUidBody.data as Record<string, unknown> | undefined
+    assert(
+      typeof zeroUidData?.uid === 'string' && zeroUidData.uid !== '0',
+      'GET /api/get_config?uid=0 should generate an RTM-safe uid',
+    )
+
     const startResponse = await requestViaRewrite('/api/startAgent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

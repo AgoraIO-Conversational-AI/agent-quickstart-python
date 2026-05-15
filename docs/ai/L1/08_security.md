@@ -22,7 +22,7 @@ Mark `AGORA_APP_CERTIFICATE` as a sensitive secret in whichever host runs the Py
 ## Token Issuance
 
 - `server.py` `get_config` calls `generate_convo_ai_token(GenerateConvoAITokenOptions(..., token_expire=3600))`.
-- The same token grants RTC and RTM privileges.
+- The same token grants RTC and RTM privileges; missing, zero, and negative UIDs are replaced with a generated UID before minting so RTM can log in with the token subject.
 - Sessions also carry `expires_in=3600` in `create_async_session`, so an idle session aligns with token expiry.
 
 ## Token Renewal
@@ -64,7 +64,7 @@ If you need real auth, add a FastAPI dependency that validates a header on each 
 
 - `server/.env.local` is the developer's secret store; do not commit it.
 - `server/.env.example` documents shape only — never put real values there.
-- `load_dotenv` reads `.env.local` then `.env` from the current working directory; run `python3 server/src/server.py` from inside `server/` so the env files are found.
+- `load_dotenv` reads `server/.env.local` then `server/.env` using a path derived from `server/src/server.py`; missing credentials fail startup initialization and leave routes returning `500`.
 - Do not log full env. `logger.error("failed: %s", err)` is fine; `logger.error(os.environ)` is not.
 
 ## CSP / Security Headers

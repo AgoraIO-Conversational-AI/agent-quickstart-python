@@ -25,7 +25,8 @@ Edit `server/src/agent.py`:
 - **LLM:** change the `OpenAI(...)` constructor (model, history, BYOK key, base URL).
 - **STT:** change the `DeepgramSTT(...)` constructor.
 - **TTS:** change the `MiniMaxTTS(...)` constructor (`model`, `voice_id`).
-- **Session:** edit `create_async_session(...)` parameters (`idle_timeout`, `expires_in`, `data_channel`, `enable_string_uid`, advanced features, parameters).
+- **Agent parameters:** edit `AgoraAgent(parameters=...)` and `advanced_features` for server-side RTM data channel, error messages, metrics, and tool flags.
+- **Session:** edit `create_async_session(...)` parameters (`idle_timeout`, `expires_in`, `enable_string_uid`).
 
 After editing, run `bun run verify:backend && bun run verify:web:api`.
 
@@ -63,7 +64,7 @@ bun run dev
 
 ## Token Renewal
 
-The browser receives `token-privilege-will-expire` from RTC and calls `getConfig()` twice — once with the RTC `client.uid`, once with the stored `agoraData.uid`. The Python backend re-issues two tokens via `generate_convo_ai_token`. If you change UID handling on either side, walk the renewal path end-to-end before merging.
+The browser receives `token-privilege-will-expire` from RTC and calls `getConfig()` twice — once with the RTC `client.uid`, once with the stored `agoraData.uid`. The Python backend re-issues RTM-capable RTC tokens via `generate_convo_ai_token`. If a request passes `uid=0`, the backend generates a non-zero UID because Agora RTC treats `0` as auto-assign but RTM token subjects cannot use `0`.
 
 ## Update Module Guides After Behavior Changes
 

@@ -57,7 +57,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 
 - `FastAPI(title="...", version="2.0.0")`.
 - `CORSMiddleware` with `allow_origins=["*"]`, `allow_credentials=True`.
-- Reads `.env.local` then `.env` via `python-dotenv` at startup.
+- Reads `server/.env.local` then `server/.env` via `python-dotenv` at startup, resolved relative to `server/src/server.py`.
 - Constructs a single `Agent` instance at import time (`agent = Agent()`).
 - Routes registered on an `APIRouter`: `GET /get_config`, `POST /startAgent`, `POST /stopAgent`.
 - All responses use the envelope `{ "code": 0, "msg": "success", "data": ... }`.
@@ -66,7 +66,8 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 
 `server/src/agent.py`:
 
-- `Agent.start(channel_name, rtc_uid, user_uid)` builds `AsyncAgora` + `AgoraAgent` from `agora-agent-server-sdk` and creates an async session.
+- `get_config` treats missing, zero, and negative UIDs as "generate a usable UID" before minting an RTC+RTM token.
+- `Agent.start(channel_name, rtc_uid, user_uid)` uses the module-level `AsyncAgora` client, builds `AgoraAgent` from `agora-agent-server-sdk`, and creates an async session.
 - `Agent.stop(agent_id)` ends the session.
 
 ## Managed Agent Defaults (server/src/agent.py)
@@ -78,7 +79,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 | TTS   | `MiniMaxTTS` | `model="speech_2_6_turbo"`, `voice_id="English_captivating_female1"`        |
 | VAD   | Agora        | Tunable `turn_detection` dict with start/end mode and timing thresholds    |
 
-Session: `enable_string_uid=False`, `idle_timeout=30`, `expires_in=3600`, `data_channel="rtm"`, `enable_error_message=True`, `enable_metrics=True`, `advanced_features={"enable_rtm": True, "enable_tools": True}`.
+Agent parameters: `data_channel="rtm"`, `enable_error_message=True`, `enable_metrics=True`. Advanced features: `{"enable_rtm": True, "enable_tools": True}`. Session options: `enable_string_uid=False`, `idle_timeout=30`, `expires_in=3600`.
 
 ## Why This Shape
 

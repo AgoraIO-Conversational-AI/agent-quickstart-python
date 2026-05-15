@@ -20,7 +20,7 @@ All findings were addressed in the docs and retested.
 
 | #   | Question                                                                | Answer Correct? | Files Read                                                                                          | Level Loaded     | Result |
 | --- | ----------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------- | ---------------- | ------ |
-| 1   | How do I install and run dev for web + server?                          | Partial → Pass after fix | `AGENTS.md`, `L0`, `L1/01_setup.md`, `package.json`, `server/run.py`                       | L0+L1 sufficient | L1 gap → Pass |
+| 1   | How do I install and run dev for web + server?                          | Partial → Pass after fix | `AGENTS.md`, `L0`, `L1/01_setup.md`, `package.json`, `server/src/server.py`                       | L0+L1 sufficient | L1 gap → Pass |
 | 2   | Which env vars are required, where do `NEXT_PUBLIC_*` belong, and how does the proxy choose where to send `/api/*`? | Yes | `L0`, `L1/01_setup.md`, `L1/02_architecture.md`, `L1/06_interfaces.md`, `web/next.config.ts`     | L0+L1 sufficient | Pass   |
 
 ### Test & Run
@@ -47,7 +47,7 @@ All findings were addressed in the docs and retested.
 
 | #   | Question                                                                | Answer Correct? | Files Read                                                                                          | Level Loaded     | Result |
 | --- | ----------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------- | ---------------- | ------ |
-| 8   | Why does the client run RTM with `uid="0"` while the agent uses a string UID, and how does renewal stay consistent? | Yes | `L1/07_gotchas.md`, `L2/session_lifecycle.md`, `web/components/ConversationComponent.tsx`, `server/src/agent.py` | L2 needed        | Pass   |
+| 8   | Why does the client replace `uid=0` before RTM login, and how does renewal stay consistent? | Yes | `L1/07_gotchas.md`, `L2/session_lifecycle.md`, `web/src/components/ConversationComponent.tsx`, `server/src/agent.py` | L2 needed        | Pass   |
 
 ## Recommended Fixes (Applied)
 

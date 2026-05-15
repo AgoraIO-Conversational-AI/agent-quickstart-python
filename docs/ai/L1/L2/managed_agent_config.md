@@ -151,7 +151,7 @@ bun run verify:web:api
 
 | Symptom                                                | Cause                                                                  |
 | ------------------------------------------------------ | ---------------------------------------------------------------------- |
-| App fails to boot with `KeyError: 'AGORA_APP_ID'`      | Missing env vars; `Agent()` reads them at import time.                  |
+| Routes return `500 Service not properly configured`    | Missing `AGORA_APP_ID` or `AGORA_APP_CERTIFICATE`; `Agent()` raises `ValueError` at import and `agent` stays `None`. |
 | `400` from `/startAgent` on a valid request            | `Agent.start` raised `ValueError` — usually missing UID fields.         |
 | Agent joins but never speaks                           | TTS BYOK key missing or wrong `voice_id`.                                |
 | Agent state stuck in `IDLE`                            | `enable_rtm` missing from `advanced_features` or RTM not subscribed yet. |
