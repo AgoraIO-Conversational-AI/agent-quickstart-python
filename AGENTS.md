@@ -16,9 +16,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 
 - Read [README.md](./README.md) for setup, supported run modes, and verification.
 - Use [ARCHITECTURE.md](./ARCHITECTURE.md) for system-level request flow.
-- Use module guides only when working inside that module:
-  - [web/AGENTS.md](./web/AGENTS.md)
-  - [server/AGENTS.md](./server/AGENTS.md)
+- For layout and responsibilities inside `web/` vs `server/`, use [docs/ai/L1/03_code_map.md](docs/ai/L1/03_code_map.md) and [docs/ai/L1/02_architecture.md](docs/ai/L1/02_architecture.md).
 
 ## Current System Shape
 
@@ -54,9 +52,8 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `README.md`: setup, local vs deploy modes, troubleshooting, and verification.
 - `ARCHITECTURE.md`: top-level environment model.
 - `web/next.config.ts`: `/api/*` rewrite mappings to the Python backend.
-- `web/src/components/LandingPage.tsx`: conversation entry point.
-- `web/src/components/ConversationComponent.tsx`: core real-time UI.
-- `web/src/hooks/useAgoraConnection.ts`: RTC, RTM, transcript, and token renewal lifecycle.
+- `web/src/components/LandingPage.tsx`: conversation entry point, RTM login, token renewal.
+- `web/src/components/ConversationComponent.tsx`: core real-time UI, RTC join, `AgoraVoiceAI`, mic UI.
 - `web/src/services/api.ts`: browser API client.
 - `server/src/server.py`: FastAPI entrypoints.
 - `server/src/agent.py`: async Agora agent lifecycle wrapper.
@@ -129,7 +126,7 @@ bun run verify
 - Do not assume Zustand or a separate client-side store exists.
 - Do not require third-party vendor API keys unless the code introduces a non-managed path.
 - Do not move token generation into the web app.
-- Do not change `/api/*` ownership without updating README, architecture docs, and both module guides.
+- Do not change `/api/*` ownership without updating README, architecture docs, root `AGENTS.md`, and the relevant `docs/ai/L1/` files.
 
 ## Done Criteria
 

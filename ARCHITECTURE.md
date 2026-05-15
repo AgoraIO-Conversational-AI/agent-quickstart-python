@@ -72,7 +72,7 @@ Token007 (AccessToken2) — generated from `AGORA_APP_ID` + `AGORA_APP_CERTIFICA
 
 ## Detailed Documentation
 
-- [web/ARCHITECTURE.md](./web/ARCHITECTURE.md) — Frontend architecture, components, state management
-- [server/ARCHITECTURE.md](./server/ARCHITECTURE.md) — Backend architecture, endpoints, AI provider config
+- [docs/ai/L1/02_architecture.md](./docs/ai/L1/02_architecture.md) — web ↔ FastAPI topology, rewrites, lifecycle
+- [docs/ai/L1/03_code_map.md](./docs/ai/L1/03_code_map.md) — where code lives under `web/` and `server/`
 - [AGENTS.md](./AGENTS.md) — AI agent development guide
 - [README.md](./README.md) — Quick start, configuration, deployment
