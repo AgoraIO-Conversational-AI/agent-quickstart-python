@@ -70,9 +70,8 @@ The browser receives `token-privilege-will-expire` from RTC and calls `getConfig
 If you change runtime behavior, also update:
 
 - `README.md`
-- `ARCHITECTURE.md` and `web/ARCHITECTURE.md` and `server/ARCHITECTURE.md`
-- The matching module `AGENTS.md` (`web/AGENTS.md`, `server/AGENTS.md`)
-- The relevant file in `docs/ai/L1/` and `Last Reviewed` in `docs/ai/L0_repo_card.md`
+- Repo-root `ARCHITECTURE.md` and `AGENTS.md`
+- The relevant file in `docs/ai/L1/` (often `02_architecture.md` and `03_code_map.md`) and `Last Reviewed` in `docs/ai/L0_repo_card.md`
 
 ## Roll Back a Bad Deploy
 

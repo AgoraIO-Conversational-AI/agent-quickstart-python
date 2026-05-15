@@ -22,14 +22,11 @@
 
 ## Doc / Code Drift
 
-- `web/ARCHITECTURE.md` references `src/hooks/useAgoraConnection.ts`. The file does not exist; lifecycle logic lives in `LandingPage.tsx` + `ConversationComponent.tsx`.
-- `web/AGENTS.md` lists `src/hooks/useAgoraConnection.ts` in its Key Files. Same issue.
-- `web/ARCHITECTURE.md` mentions Turbopack as the dev tool. `web/package.json`'s `dev` script is `next dev --webpack`. The repo uses Webpack for dev parity with build.
-- `server/ARCHITECTURE.md` shows `create_session(..., enable_string_uid=True)`. The code uses `create_async_session(..., enable_string_uid=False)`.
-- `server/ARCHITECTURE.md` documents an "Agent not found | 200" response. The actual handler raises through `_to_http_error` and never returns 200 with an error.
+- Per-module `AGENTS.md` / `ARCHITECTURE.md` under `web/` and `server/` were removed. Use repo-root `ARCHITECTURE.md`, `AGENTS.md`, and `docs/ai/L1/` as the maintained entry points.
 - `web/docs/ARCHITECTURE.md` is a generic Vite + Zustand template; it does not describe this Next app.
+- When reconciling older notes with the code, watch for: no `useAgoraConnection` hook (lifecycle is inline in `LandingPage.tsx` / `ConversationComponent.tsx`), Turbopack mentions vs `web/package.json` using `next dev --webpack`, and FastAPI session APIs (`create_async_session`, error mapping via `_to_http_error`) vs outdated snippets.
 
-Until those documents are reconciled, prefer code + `docs/ai/` as the source of truth.
+Until stale copies reappear elsewhere, prefer code + `docs/ai/` as the source of truth.
 
 ## StrictMode + RTC
 

@@ -4,7 +4,7 @@
 
 ## Why It Matters
 
-The browser holds the only state that ties RTC, RTM, and the managed agent together. There is **no `useAgoraConnection` hook in this repo** despite what `web/AGENTS.md` claims — the lifecycle lives inline in `LandingPage.tsx` and `ConversationComponent.tsx`. Mistakes here surface as ghost audio sessions, missing transcripts, or silent token-expiry disconnects.
+The browser holds the only state that ties RTC, RTM, and the managed agent together. There is **no `useAgoraConnection` hook in this repo** — the lifecycle lives inline in `LandingPage.tsx` and `ConversationComponent.tsx`. Mistakes here surface as ghost audio sessions, missing transcripts, or silent token-expiry disconnects.
 
 ## End-to-End Sequence
 

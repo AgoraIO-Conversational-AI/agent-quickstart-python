@@ -52,17 +52,12 @@ web/                      # Next.js 16 app (workspace member)
   biome.json
   next.config.ts          # rewrites() (see 02_architecture)
   tsconfig.json
-  AGENTS.md
-  ARCHITECTURE.md         # Partially stale (mentions useAgoraConnection.ts)
   docs/                   # Workflow + review + project state templates
 
 server/                   # Python FastAPI backend
   requirements.txt        # fastapi, uvicorn, requests, dotenv, agora-agent-server-sdk
   .env.example
   README.md
-  ARCHITECTURE.md         # Partially stale (mentions create_session, enable_string_uid=True)
-  AGENTS.md
-  CLAUDE.md
   src/
     __init__.py
     server.py             # FastAPI app + APIRouter routes
@@ -93,11 +88,11 @@ server/                   # Python FastAPI backend
 - `web/` owns React UI, RTC/RTM lifecycle, and the proxy contract.
 - `server/src/` owns FastAPI handlers and all Agora SDK calls; secrets stay here.
 - `web/scripts/` owns verification harnesses that gate `bun run verify`.
-- Module-level `AGENTS.md` exists in `web/` and `server/` for narrower task guidance.
+- Module-specific `AGENTS.md` / `ARCHITECTURE.md` under `web/` and `server/` were removed — use repo-root `ARCHITECTURE.md`, `AGENTS.md`, and this L1 tree.
 
 ## What's Not in the Repo
 
-- **No `web/src/hooks/`** and **no `useAgoraConnection.ts`** — `web/AGENTS.md` and `web/ARCHITECTURE.md` still reference it; treat those references as stale. The hook's responsibilities are inlined in `LandingPage.tsx` and `ConversationComponent.tsx`.
+- **No `web/src/hooks/`** and **no `useAgoraConnection.ts`** — RTC/RTM orchestration lives in `LandingPage.tsx` and `ConversationComponent.tsx`.
 - **No `pyproject.toml`** — Python deps are pip + `requirements.txt`.
 - **No `tests/` directory** — Python verification is `py_compile` plus the bun-spawned smoke scripts.
 - **No `Makefile`** — `bun run …` is the canonical entry point.

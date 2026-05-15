@@ -108,8 +108,9 @@ async def get_config(
         )
 
     try:
-        # uid may be 0 (Next.js parity for RTM renewal); only substitute when the query param is absent.
-        user_uid = random.randint(1000, 9999999) if uid is None else uid
+        # Agora RTC accepts uid=0 as "auto assign", but RTM token subjects cannot
+        # use 0. Replace missing, zero, or negative values with a generated UID.
+        user_uid = random.randint(1000, 9999999) if uid is None or uid <= 0 else uid
         agent_uid = str(random.randint(10000000, 99999999))
         channel_name = channel or _generate_channel_name()
 
