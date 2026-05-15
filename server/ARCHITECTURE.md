@@ -2,14 +2,14 @@
 
 ## Overview
 
-Python FastAPI service providing the local backend path for token generation and Agora agent management.
+Python FastAPI service providing the backend path for token generation and Agora agent management.
 
-**Core Responsibilities in local development**:
+**Core Responsibilities**:
 - Generate RTC/RTM tokens for client connections
 - Start/stop AI agents with ASR, LLM, and TTS configuration
 - Provide a stateless-safe FastAPI bridge between the frontend and Agora Conversational AI APIs
 
-In deployed web mode, the Next app can serve the same API contract directly. This module is therefore the local development backend, not the only backend implementation in the repo.
+The Next app forwards browser-facing `/api/*` requests here through `AGENT_BACKEND_URL`; it does not run token or AgentKit logic in-process.
 
 ## Tech Stack
 
@@ -52,8 +52,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"])
 agent = Agent()  # Singleton
 
 @router.get("/get_config")           # Generate connection config
-@router.post("/v2/startAgent")       # Start AI agent
-@router.post("/v2/stopAgent")        # Stop AI agent
+@router.post("/startAgent")          # Start AI agent
+@router.post("/stopAgent")           # Stop AI agent
 ```
 
 ### 2. agent.py - Agent Management Layer
@@ -134,7 +134,7 @@ Generate connection configuration for frontend client.
 3. Generate token via `generate_convo_ai_token()` (1h expiry)
 4. Return configuration bundle
 
-### POST /v2/startAgent
+### POST /startAgent
 
 Start an AI agent in specified channel.
 
@@ -160,7 +160,7 @@ Start an AI agent in specified channel.
 }
 ```
 
-### POST /v2/stopAgent
+### POST /stopAgent
 
 Stop a running agent.
 
@@ -250,12 +250,12 @@ Frontend Client
 
 ## Integration with Frontend
 
-Frontend connects through Next route handlers in `web/app/api`. In local Python mode, those handlers forward to the FastAPI service through `AGENT_BACKEND_URL`:
+Frontend connects through Next rewrites in `web/next.config.ts`. The browser keeps `/api/*` URLs while Next forwards to the FastAPI service through `AGENT_BACKEND_URL`:
 
 ```
-/api/get_config    → Next route handler → http://localhost:8000/get_config
-/api/v2/startAgent → Next route handler → http://localhost:8000/v2/startAgent
-/api/v2/stopAgent  → Next route handler → http://localhost:8000/v2/stopAgent
+/api/get_config  → Next rewrite → http://localhost:8000/get_config
+/api/startAgent  → Next rewrite → http://localhost:8000/startAgent
+/api/stopAgent   → Next rewrite → http://localhost:8000/stopAgent
 ```
 
 ## Error Handling

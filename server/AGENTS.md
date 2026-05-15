@@ -4,9 +4,7 @@ Use this guide when changing files under `server/`.
 
 ## Current Role
 
-This module is the local FastAPI backend for the quickstart. It remains the authoritative local backend when developing the full stack on one machine.
-
-The deployed web app can also serve `/api/*` directly from Next route handlers, so do not assume Python owns production traffic in every environment.
+This module is the FastAPI backend for the quickstart. Next rewrites browser-facing `/api/*` requests here through `AGENT_BACKEND_URL`.
 
 ## Current Stack
 
@@ -18,7 +16,7 @@ The deployed web app can also serve `/api/*` directly from Next route handlers, 
 
 ## Current Implementation Model
 
-- `src/server.py` exposes `/get_config`, `/v2/startAgent`, and `/v2/stopAgent`
+- `src/server.py` exposes `/get_config`, `/startAgent`, and `/stopAgent`
 - `src/agent.py` wraps `AsyncAgora`
 - agent sessions are scoped to the requesting user with `remote_uids=[user_uid]`
 - stop is idempotent through a session stop first, then `client.stop_agent(...)` fallback
@@ -78,6 +76,6 @@ uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
 ## Working Rules
 
 - Keep the FastAPI handlers async-friendly.
-- Keep token generation behavior aligned with the Next route handlers.
+- Keep token generation behavior owned by Python; the Next app should only rewrite requests.
 - If you change the request or response contract, update the web client and root README in the same change.
-- If you change agent defaults, update both backend implementations or document the intended divergence clearly.
+- If you change agent defaults, update the Python implementation and the docs that describe it.

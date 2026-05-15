@@ -18,37 +18,34 @@ Use this guide when changing files under `web/`.
 - The landing screen and live conversation UI
 - RTC client setup and channel join lifecycle
 - RTM login, transcript handling, and token renewal
-- Web-facing `/api/*` route handlers for quick deployment
-- Optional local proxy fallback to the Python backend through `AGENT_BACKEND_URL`
+- Web-facing `/api/*` paths via Next rewrites
+- Python backend forwarding through `AGENT_BACKEND_URL`
 
 ## Important Files
 
 - `app/page.tsx`: root page and Agora provider setup
-- `app/api/**/route.ts`: server-side API handlers used in deployment and local proxy mode
 - `src/components/app.tsx`: user-facing conversation experience
 - `src/hooks/useAgoraConnection.ts`: RTC/RTM/agent lifecycle
 - `src/lib/conversation.ts`: transcript helpers
-- `src/lib/server/agora.ts`: server-side token and agent helpers
 - `src/services/api.ts`: browser API client
-- `next.config.ts`: Turbopack root configuration for the nested app
+- `next.config.ts`: Turbopack root configuration and `/api/*` rewrite mappings
 
 ## Request Flow
 
 ### Local Development
 
 - Run `bun run dev` from the repo root
-- The Next route handlers stay in the request path
-- They proxy to `http://localhost:8000` when `AGENT_BACKEND_URL` is set by the root scripts
+- Next rewrites `/api/*` requests to `http://localhost:8000`
+- `AGENT_BACKEND_URL` is set by the root scripts
 
 ### Deployment
 
 - Deploy `web` as the app root
-- The same route handlers run in-process and generate config or start/stop agents directly
+- Set `AGENT_BACKEND_URL` to a reachable Python backend
 
 ## Working Rules
 
-- Keep the route handlers usable in both local proxy mode and deployed in-app mode.
-- Do not add a global rewrite-based proxy.
+- Keep `/api/*` paths as rewrites to Python; do not reintroduce in-process Route Handlers.
 - Keep RTC client creation StrictMode-safe.
 - Keep transcript speaker mapping based on actual UIDs, not heuristics.
 - When adding new env requirements for deployed mode, update `.env.local.example` and the root README.

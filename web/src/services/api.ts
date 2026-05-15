@@ -8,10 +8,14 @@ export interface GetConfigResponse {
   agent_uid: string
 }
 
-export async function getConfig(options?: { channel?: string; uid?: string }): Promise<GetConfigResponse> {
+export async function getConfig(options?: { channel?: string; uid?: string | number }): Promise<GetConfigResponse> {
   const params = new URLSearchParams()
-  if (options?.channel) params.set('channel', options.channel)
-  if (options?.uid) params.set('uid', options.uid)
+  if (options?.channel !== undefined && options.channel !== '') {
+    params.set('channel', options.channel)
+  }
+  if (options?.uid !== undefined && options.uid !== '') {
+    params.set('uid', String(options.uid))
+  }
 
   const query = params.toString()
   const response = await fetch(`${API_BASE_URL}/get_config${query ? `?${query}` : ''}`, {
@@ -33,7 +37,7 @@ export async function getConfig(options?: { channel?: string; uid?: string }): P
 export async function startAgent(channelName: string, rtcUid: number, userUid: number): Promise<string> {
   const payload = { channelName, rtcUid, userUid }
 
-  const response = await fetch(`${API_BASE_URL}/v2/startAgent`, {
+  const response = await fetch(`${API_BASE_URL}/startAgent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -54,7 +58,7 @@ export async function startAgent(channelName: string, rtcUid: number, userUid: n
 export async function stopAgent(agentId: string): Promise<void> {
   if (!agentId) return
 
-  const response = await fetch(`${API_BASE_URL}/v2/stopAgent`, {
+  const response = await fetch(`${API_BASE_URL}/stopAgent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ agentId }),

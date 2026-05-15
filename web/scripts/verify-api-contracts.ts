@@ -1,10 +1,13 @@
-import { NextRequest } from 'next/server'
-import { AgoraClient, Agent } from 'agora-agent-server-sdk'
-import { RtcTokenBuilder } from 'agora-token'
+import { existsSync, readdirSync } from 'node:fs'
+import path from 'node:path'
 
-import { GET as getConfig } from '../app/api/get_config/route'
-import { POST as startAgent } from '../app/api/v2/startAgent/route'
-import { POST as stopAgent } from '../app/api/v2/stopAgent/route'
+import nextConfig from '../next.config'
+import { getConfig, startAgent, stopAgent } from '../src/services/api'
+
+type Rewrite = {
+  source: string
+  destination: string
+}
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -12,154 +15,167 @@ function assert(condition: unknown, message: string): asserts condition {
   }
 }
 
-function getJson(response: Response) {
-  return response.json() as Promise<Record<string, unknown>>
+async function getRewrites(): Promise<Rewrite[]> {
+  const rewrites = nextConfig.rewrites
+  assert(typeof rewrites === 'function', 'next.config.ts should define async rewrites()')
+
+  const result = await rewrites()
+  if (Array.isArray(result)) {
+    return result as Rewrite[]
+  }
+
+  return [
+    ...((result.beforeFiles ?? []) as Rewrite[]),
+    ...((result.afterFiles ?? []) as Rewrite[]),
+    ...((result.fallback ?? []) as Rewrite[]),
+  ]
 }
 
-async function verifyGetConfigRoute() {
-  process.env.AGORA_APP_ID = '0123456789abcdef0123456789abcdef'
-  process.env.AGORA_APP_CERTIFICATE = 'fedcba9876543210fedcba9876543210'
-  delete process.env.AGENT_BACKEND_URL
+function requestUrl(input: Parameters<typeof fetch>[0]) {
+  if (typeof input === 'string' || input instanceof URL) {
+    return new URL(input, 'http://localhost:3000')
+  }
+  return new URL(input.url)
+}
 
-  const originalBuildTokenWithRtm = RtcTokenBuilder.buildTokenWithRtm
-  let tokenBuilderArgs: unknown[] | null = null
+function getRequestBody(init: RequestInit | undefined) {
+  assert(typeof init?.body === 'string', 'POST request should include a JSON string body')
+  return JSON.parse(init.body) as Record<string, unknown>
+}
 
-  RtcTokenBuilder.buildTokenWithRtm = ((...args: unknown[]) => {
-    tokenBuilderArgs = args
-    return 'mock-rtc-rtm-token'
-  }) as typeof RtcTokenBuilder.buildTokenWithRtm
+async function verifyRewriteContract() {
+  const originalBackendUrl = process.env.AGENT_BACKEND_URL
+  process.env.AGENT_BACKEND_URL = 'http://localhost:8000/'
 
   try {
-    const request = new NextRequest('http://localhost:3000/api/get_config?uid=1234&channel=test-channel')
-    const response = await getConfig(request)
-    const body = await getJson(response)
-
-    assert(response.status === 200, 'GET /api/get_config should return 200')
-    assert(body.code === 0, 'GET /api/get_config should return code 0')
-
-    const data = body.data as Record<string, unknown> | undefined
-    assert(data, 'GET /api/get_config should include data')
-    assert(data?.app_id === process.env.AGORA_APP_ID, 'GET /api/get_config should echo app_id')
-    assert(data?.uid === '1234', 'GET /api/get_config should preserve uid')
-    assert(data?.channel_name === 'test-channel', 'GET /api/get_config should preserve channel_name')
-    assert(data?.token === 'mock-rtc-rtm-token', 'GET /api/get_config should return the RTC+RTM token')
-    assert(typeof data?.agent_uid === 'string' && data.agent_uid.length > 0, 'GET /api/get_config should return agent_uid')
-
-    assert(Array.isArray(tokenBuilderArgs), 'GET /api/get_config should call buildTokenWithRtm')
-    assert(tokenBuilderArgs?.[2] === 'test-channel', 'buildTokenWithRtm should use the requested channel')
-    assert(tokenBuilderArgs?.[3] === 1234, 'buildTokenWithRtm should receive an int uid')
+    const rewrites = await getRewrites()
+    assert(
+      rewrites.some(
+        (rewrite) => rewrite.source === '/api/get_config' && rewrite.destination === 'http://localhost:8000/get_config',
+      ),
+      'next.config.ts should rewrite /api/get_config to /get_config on the Python backend',
+    )
+    assert(
+      rewrites.some(
+        (rewrite) => rewrite.source === '/api/startAgent' && rewrite.destination === 'http://localhost:8000/startAgent',
+      ),
+      'next.config.ts should rewrite /api/startAgent to /startAgent on the Python backend',
+    )
+    assert(
+      rewrites.some(
+        (rewrite) => rewrite.source === '/api/stopAgent' && rewrite.destination === 'http://localhost:8000/stopAgent',
+      ),
+      'next.config.ts should rewrite /api/stopAgent to /stopAgent on the Python backend',
+    )
   } finally {
-    RtcTokenBuilder.buildTokenWithRtm = originalBuildTokenWithRtm
+    if (originalBackendUrl) {
+      process.env.AGENT_BACKEND_URL = originalBackendUrl
+    } else {
+      process.env.AGENT_BACKEND_URL = ''
+    }
   }
 }
 
-async function verifyStartAgentValidation() {
-  delete process.env.AGENT_BACKEND_URL
+async function verifyRouteHandlersRemoved() {
+  const apiDir = path.join(process.cwd(), 'app', 'api')
+  if (!existsSync(apiDir)) {
+    return
+  }
 
-  const request = new NextRequest('http://localhost:3000/api/v2/startAgent', {
-    body: JSON.stringify({ channelName: 'missing-uids' }),
-    method: 'POST',
-  })
-  const response = await startAgent(request)
-  const body = await getJson(response)
+  const pendingDirs = [apiDir]
+  while (pendingDirs.length > 0) {
+    const currentDir = pendingDirs.pop()
+    assert(currentDir, 'Expected a directory to scan')
 
-  assert(response.status === 400, 'POST /api/v2/startAgent should reject missing fields')
-  assert(body.detail === 'channelName, rtcUid, and userUid are required', 'POST /api/v2/startAgent should explain validation failure')
-}
-
-async function verifyStartAgentSuccess() {
-  process.env.AGORA_APP_ID = '0123456789abcdef0123456789abcdef'
-  process.env.AGORA_APP_CERTIFICATE = 'fedcba9876543210fedcba9876543210'
-  delete process.env.AGENT_BACKEND_URL
-
-  const originalCreateSession = Agent.prototype.createSession
-  let capturedSessionConfig: { channel?: string; agentUid?: string; remoteUids?: string[] } | null = null
-
-  Agent.prototype.createSession = ((_: unknown, sessionConfig: unknown) => {
-    capturedSessionConfig = sessionConfig as { channel?: string; agentUid?: string; remoteUids?: string[] }
-    return {
-      start: async () => 'mock-agent-id',
+    for (const entry of readdirSync(currentDir, { withFileTypes: true })) {
+      const entryPath = path.join(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        pendingDirs.push(entryPath)
+      }
+      assert(!entryPath.endsWith(`${path.sep}route.ts`), `${entryPath} should not exist`)
     }
-  }) as unknown as typeof Agent.prototype.createSession
-
-  try {
-    const request = new NextRequest('http://localhost:3000/api/v2/startAgent', {
-      body: JSON.stringify({
-        channelName: 'test-channel',
-        rtcUid: 9999,
-        userUid: 1234,
-      }),
-      method: 'POST',
-    })
-    const response = await startAgent(request)
-    const body = await getJson(response)
-
-    assert(response.status === 200, 'POST /api/v2/startAgent should return 200 on success')
-    assert(body.code === 0, 'POST /api/v2/startAgent should return code 0')
-    assert((body.data as Record<string, unknown>)?.agent_id === 'mock-agent-id', 'POST /api/v2/startAgent should return the started agent id')
-    assert(capturedSessionConfig !== null, 'POST /api/v2/startAgent should call createSession')
-    const sessionConfig = capturedSessionConfig as {
-      channel?: string
-      agentUid?: string
-      remoteUids?: string[]
-    }
-
-    assert(sessionConfig.channel === 'test-channel', 'POST /api/v2/startAgent should pass the requested channel to createSession')
-    assert(sessionConfig.agentUid === '9999', 'POST /api/v2/startAgent should stringify the rtc uid for the agent session')
-    assert(JSON.stringify(sessionConfig.remoteUids) === JSON.stringify(['1234']), 'POST /api/v2/startAgent should scope the session to the requesting user')
-  } finally {
-    Agent.prototype.createSession = originalCreateSession
   }
 }
 
-async function verifyStopAgentValidation() {
-  delete process.env.AGENT_BACKEND_URL
+async function verifyApiClientRequests() {
+  const originalFetch = globalThis.fetch
+  const seenPaths: string[] = []
 
-  const request = new NextRequest('http://localhost:3000/api/v2/stopAgent', {
-    body: JSON.stringify({}),
-    method: 'POST',
-  })
-  const response = await stopAgent(request)
-  const body = await getJson(response)
+  globalThis.fetch = (async (input, init) => {
+    const url = requestUrl(input)
+    seenPaths.push(url.pathname)
 
-  assert(response.status === 400, 'POST /api/v2/stopAgent should reject missing agentId')
-  assert(body.detail === 'agentId is required', 'POST /api/v2/stopAgent should explain validation failure')
-}
+    if (url.pathname === '/api/get_config') {
+      assert(init?.method === 'GET', 'GET /api/get_config should use GET')
+      assert(url.searchParams.get('uid') === '1234', 'GET /api/get_config should pass the requested uid')
+      assert(
+        url.searchParams.get('channel') === 'test-channel',
+        'GET /api/get_config should pass the requested channel',
+      )
 
-async function verifyStopAgentSuccess() {
-  process.env.AGORA_APP_ID = '0123456789abcdef0123456789abcdef'
-  process.env.AGORA_APP_CERTIFICATE = 'fedcba9876543210fedcba9876543210'
-  delete process.env.AGENT_BACKEND_URL
+      return Response.json({
+        code: 0,
+        data: {
+          app_id: 'stub-app-id',
+          token: 'stub-token',
+          uid: '1234',
+          channel_name: 'test-channel',
+          agent_uid: '9999',
+        },
+        msg: 'success',
+      })
+    }
 
-  const originalStopAgent = AgoraClient.prototype.stopAgent
-  let stoppedAgentId: string | null = null
+    if (url.pathname === '/api/startAgent') {
+      assert(init?.method === 'POST', 'POST /api/startAgent should use POST')
+      const body = getRequestBody(init)
+      assert(body.channelName === 'test-channel', 'POST /api/startAgent should include channelName')
+      assert(body.rtcUid === 9999, 'POST /api/startAgent should include rtcUid')
+      assert(body.userUid === 1234, 'POST /api/startAgent should include userUid')
 
-  AgoraClient.prototype.stopAgent = (async function (this: AgoraClient, agentId: string) {
-    stoppedAgentId = agentId
-  }) as typeof AgoraClient.prototype.stopAgent
+      return Response.json({
+        code: 0,
+        data: {
+          agent_id: 'mock-agent-id',
+          channel_name: 'test-channel',
+          status: 'started',
+        },
+        msg: 'success',
+      })
+    }
+
+    if (url.pathname === '/api/stopAgent') {
+      assert(init?.method === 'POST', 'POST /api/stopAgent should use POST')
+      const body = getRequestBody(init)
+      assert(body.agentId === 'mock-agent-id', 'POST /api/stopAgent should include agentId')
+      return Response.json({ code: 0, msg: 'success' })
+    }
+
+    return Response.json({ detail: `Unexpected request path: ${url.pathname}` }, { status: 404 })
+  }) as typeof fetch
 
   try {
-    const request = new NextRequest('http://localhost:3000/api/v2/stopAgent', {
-      body: JSON.stringify({ agentId: 'mock-agent-id' }),
-      method: 'POST',
-    })
-    const response = await stopAgent(request)
-    const body = await getJson(response)
+    const config = await getConfig({ uid: 1234, channel: 'test-channel' })
+    assert(config.token === 'stub-token', 'GET /api/get_config should return response data')
 
-    assert(response.status === 200, 'POST /api/v2/stopAgent should return 200 on success')
-    assert(body.code === 0, 'POST /api/v2/stopAgent should return code 0')
-    assert(stoppedAgentId === 'mock-agent-id', 'POST /api/v2/stopAgent should call stopAgent with the requested agent id')
+    const agentId = await startAgent('test-channel', 9999, 1234)
+    assert(agentId === 'mock-agent-id', 'POST /api/startAgent should return the agent id')
+
+    await stopAgent(agentId)
+
+    assert(
+      JSON.stringify(seenPaths) === JSON.stringify(['/api/get_config', '/api/startAgent', '/api/stopAgent']),
+      'API client should call the unversioned /api paths',
+    )
   } finally {
-    AgoraClient.prototype.stopAgent = originalStopAgent
+    globalThis.fetch = originalFetch
   }
 }
 
 async function main() {
-  await verifyGetConfigRoute()
-  await verifyStartAgentValidation()
-  await verifyStartAgentSuccess()
-  await verifyStopAgentValidation()
-  await verifyStopAgentSuccess()
+  await verifyRewriteContract()
+  await verifyRouteHandlersRemoved()
+  await verifyApiClientRequests()
   console.log('API contract checks passed')
 }
 

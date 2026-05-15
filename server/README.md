@@ -6,22 +6,45 @@ Agora Conversational AI Agent service built with FastAPI.
 
 Use the repo-root [README.md](../README.md) for the normal full-stack local flow. This document is for working on the Python backend module directly.
 
-Follow [Get started with Agora](https://docs.agora.io/en/conversational-ai/get-started/manage-agora-account#enable-conversational-ai) to get the **App ID** and **App Certificate** and enable the **Conversational AI** service.
+Recommended from the repo root.
+
+Repo setup:
+
+```bash
+bun run setup
+```
+
+Agora credentials:
+
+```bash
+agora project env write server/.env.local
+```
+
+Run the app:
+
+```bash
+bun run dev
+```
+
+This assumes the Agora CLI is installed and logged in. The command uses the project selected in your Agora CLI context, which is usually your default account project.
+
+If you are not using the Agora CLI, create the env file manually and fill in your project values:
+
+```bash
+cp server/.env.example server/.env.local
+```
 
 From `server/`:
 
 ### 1. Configure Environment
 
-Preferred:
+Backend-only Agora CLI env write:
 
 ```bash
-agora login
-agora project create my-first-voice-agent --feature rtc --feature convoai
-agora project use my-first-voice-agent
-agora project env write .env.local --with-secrets
+agora project env write .env.local
 ```
 
-Reference fallback:
+Manual fallback:
 
 ```bash
 cp .env.example .env.local
@@ -31,6 +54,27 @@ cp .env.example .env.local
 - `AGORA_APP_ID` - Your Agora App ID (Required)
 - `AGORA_APP_CERTIFICATE` - Your Agora App Certificate (Required)
 - Agora managed provider access should be enabled for this project
+
+If you still need to authenticate with the CLI:
+
+```bash
+agora login
+```
+
+To select a specific existing project before writing env values:
+
+```bash
+agora project use <project-id-or-name>
+agora project env write .env.local
+```
+
+To create a new project instead of using your default project:
+
+```bash
+agora project create my-first-voice-agent --feature rtc --feature convoai
+agora project use my-first-voice-agent
+agora project env write .env.local
+```
 
 **Note**: The service uses Token007 authentication generated from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. Third-party vendor keys are not required in this default managed setup. The current default chain matches the Next.js quickstart: `DeepgramSTT` (`nova-3`) + `OpenAI` (`gpt-4o-mini`) + `MiniMaxTTS` (`speech_2_6_turbo` / `English_captivating_female1`). The FastAPI sample now uses `AsyncAgora` so the request path matches the local Agora guidance for async frameworks.
 
@@ -59,9 +103,9 @@ The service will start on port 8000 (or the port specified in `.env.local`).
 
 ## How This Fits The Repo
 
-- Full-stack local development: run `bun run dev` from the repo root. The browser still calls Next `/api/*`, and those route handlers proxy to this FastAPI service.
+- Full-stack local development: run `bun run dev` from the repo root. The browser still calls Next `/api/*`, and Next rewrites those requests to this FastAPI service.
 - Module-local backend work: use the commands in this README when you only need to run or inspect the Python service itself.
-- Single-target web deployment: this Python service is not required unless you intentionally point `AGENT_BACKEND_URL` at an external backend.
+- Deployment: this Python service is required because the web app only forwards API requests through `AGENT_BACKEND_URL`.
 
 ### 4. Test API
 
@@ -70,12 +114,12 @@ The service will start on port 8000 (or the port specified in `.env.local`).
 curl http://localhost:8000/get_config
 
 # Test agent start
-curl -X POST http://localhost:8000/v2/startAgent \
+curl -X POST http://localhost:8000/startAgent \
   -H "Content-Type: application/json" \
   -d '{"channelName": "test_channel", "rtcUid": 123456, "userUid": 789012}'
 
 # Test agent stop (use agent_id from start response)
-curl -X POST http://localhost:8000/v2/stopAgent \
+curl -X POST http://localhost:8000/stopAgent \
   -H "Content-Type: application/json" \
   -d '{"agentId": "your_agent_id"}'
 ```
@@ -83,8 +127,8 @@ curl -X POST http://localhost:8000/v2/stopAgent \
 ## API Endpoints
 
 - `GET /get_config` - Generate connection configuration
-- `POST /v2/startAgent` - Start an agent
-- `POST /v2/stopAgent` - Stop an agent
+- `POST /startAgent` - Start an agent
+- `POST /stopAgent` - Stop an agent
 
 `/get_config` now issues one-hour RTC plus RTM tokens. The web client renews both before expiry, matching the reference Next.js session model.
 

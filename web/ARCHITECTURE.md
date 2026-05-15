@@ -1,6 +1,6 @@
 # Agora Conversational AI Web Demo - Architecture
 
-This module owns the browser experience and the web-facing `/api/*` entrypoints.
+This module owns the browser experience and the web-facing `/api/*` entrypoints. Those entrypoints are declarative rewrites to the Python FastAPI backend.
 
 ## Tech Stack
 
@@ -20,8 +20,8 @@ This module owns the browser experience and the web-facing `/api/*` entrypoints.
 
 | Environment | Owner of `/api/*` | Implementation |
 |-------------|-------------------|----------------|
-| Local dev | Next route handlers with proxy fallback | `app/api/**/route.ts` forwarding to `AGENT_BACKEND_URL` |
-| Deployment | Next route handlers in-process | `app/api/**/route.ts` using `src/lib/server/agora.ts` |
+| Local dev | Next rewrites | `next.config.ts` forwarding to `AGENT_BACKEND_URL` |
+| Deployment | Next rewrites | `next.config.ts` forwarding to the deployed Python backend |
 
 ## Project Structure
 
@@ -39,10 +39,8 @@ This module owns the browser experience and the web-facing `/api/*` entrypoints.
 │   │   └── api.ts           # Backend API calls (get_config, startAgent, stopAgent)
 │   └── lib/                 # Utility libraries
 │       ├── conversation.ts  # Transcript + visualizer helpers
-│       ├── server/agora.ts  # Shared server-side Agora helpers for route handlers
 │       └── utils.ts         # Common utility functions
 │
-├── app/api/                 # Route handlers for quick Vercel deployment
 ├── ../server/        # Backend service (project root level)
 │   ├── src/
 │   │   ├── server.py        # FastAPI entry, route definitions
@@ -77,8 +75,8 @@ User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | /api/get_config | GET | Generate connection config (token, channel, UIDs) |
-| /api/v2/startAgent | POST | Start Conversational AI Agent |
-| /api/v2/stopAgent | POST | Stop Agent |
+| /api/startAgent | POST | Start Conversational AI Agent |
+| /api/stopAgent | POST | Stop Agent |
 
 ### Request/Response Examples
 
@@ -98,7 +96,7 @@ User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
 }
 ```
 
-#### POST /api/v2/startAgent
+#### POST /api/startAgent
 ```json
 // Request
 {
@@ -119,7 +117,7 @@ User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
 }
 ```
 
-#### POST /api/v2/stopAgent
+#### POST /api/stopAgent
 ```json
 // Request
 {
@@ -135,16 +133,15 @@ User Action → useAgoraConnection hook → Agora SDK (agora-rtc-react)
 
 ## Environment Modes
 
-### Local Python-Backed Development
+### Python-Backed Development and Deployment
 
 ```
-app/api/
-├── get_config/route.ts
-└── v2/
-    ├── startAgent/route.ts
-    └── stopAgent/route.ts
+next.config.ts
+└── rewrites()
+    ├── /api/get_config → AGENT_BACKEND_URL/get_config
+    ├── /api/startAgent → AGENT_BACKEND_URL/startAgent
+    └── /api/stopAgent  → AGENT_BACKEND_URL/stopAgent
 
-Optional local backend:
 ../server/
 ├── src/
 │   ├── server.py
@@ -152,32 +149,25 @@ Optional local backend:
 └── requirements.txt
 ```
 
-In this mode, the web client still receives all browser requests. The route handlers proxy to Python through `AGENT_BACKEND_URL`.
-
-### Single-Target Web Deployment
-
-The same `app/api/**/route.ts` files run directly inside the deployed Next app. No separate Python service is required.
+The web client still uses same-origin `/api/*` URLs. Next rewrites them to Python through `AGENT_BACKEND_URL`; no `app/api/**/route.ts` files are required.
 
 ## Environment Variables
 
-The web client route handlers can read configuration from `web/.env.local` or Vercel project env vars:
+The web app reads configuration from `web/.env.local` or deployment env vars:
 
 | Variable | Description |
 |----------|-------------|
-| AGORA_APP_ID | Agora App ID |
-| AGORA_APP_CERTIFICATE | Agora App Certificate |
-| AGENT_GREETING | Optional custom greeting for the Ada persona |
-| AGENT_BACKEND_URL | Optional Python backend URL for local proxy mode |
+| AGENT_BACKEND_URL | Required Python backend URL for `/api/*` rewrites |
+| NEXT_PUBLIC_AGORA_APP_ID | Optional browser override for the Agora App ID; normally supplied by `/api/get_config` |
 
-## Local Proxy Mode
+## Rewrite Proxy
 
-When `AGENT_BACKEND_URL` is set, the Next route handlers forward `/api/*` requests to the Python backend:
+When `AGENT_BACKEND_URL` is set, Next forwards `/api/*` requests to the Python backend:
 
 ```typescript
-const proxiedResponse = await proxyToPythonBackend('v2/startAgent', {
-  method: 'POST',
-  body: JSON.stringify({ channelName, rtcUid, userUid }),
-})
+rewrites: () => [
+  { source: '/api/startAgent', destination: `${backendUrl}/startAgent` },
+]
 ```
 
 ## Event Flow
@@ -185,11 +175,11 @@ const proxiedResponse = await proxyToPythonBackend('v2/startAgent', {
 1. User clicks connect → Call `/api/get_config` to get configuration
 2. `AgoraRTCProvider` creates exactly one RTC client via `useRef`, which avoids StrictMode double creation
 3. `useAgoraConnection` gates `useJoin` and `useLocalMicrophoneTrack` behind a readiness flag
-4. `/api/*` is handled in-process in deployed mode, or proxied to Python when `AGENT_BACKEND_URL` is set
+4. `/api/*` is rewritten by Next to the Python backend
 5. Use returned token to login RTM and join RTC
 6. Initialize `AgoraVoiceAI` from `agora-agent-client-toolkit`
 7. `voiceAI.subscribeMessage(channel)` listens for transcript and agent-state events
-8. Call `/api/v2/startAgent` to start the requester-scoped agent session
+8. Call `/api/startAgent` to start the requester-scoped agent session
 9. Normalize local transcript UID `0` back to the actual RTC UID before rendering `ConvoTextStream`
 10. Renew RTC and RTM tokens through `/api/get_config?channel=...&uid=...` before expiry
-11. User clicks stop → Call `/api/v2/stopAgent` → Cleanup resources
+11. User clicks stop → Call `/api/stopAgent` → Cleanup resources

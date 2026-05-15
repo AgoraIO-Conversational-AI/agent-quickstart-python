@@ -43,28 +43,19 @@ const mergedEnv = {
 }
 
 const backendUrl = mergedEnv.AGENT_BACKEND_URL
-if (backendUrl) {
-  try {
-    const parsed = new URL(backendUrl)
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      throw new Error('unsupported protocol')
-    }
-  } catch {
-    fail('AGENT_BACKEND_URL must be a valid http(s) URL.')
+if (!backendUrl?.trim()) {
+  fail(
+    'Missing AGENT_BACKEND_URL. The web app proxies /api/* requests to the Python backend and cannot serve them in-process.',
+  )
+}
+
+try {
+  const parsed = new URL(backendUrl)
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('unsupported protocol')
   }
-
-  console.log(`Doctor checks passed for local proxy mode (${backendUrl})`)
-  process.exit(0)
+} catch {
+  fail('AGENT_BACKEND_URL must be a valid http(s) URL.')
 }
 
-if (!existsSync(envPath) && !mergedEnv.AGORA_APP_ID && !mergedEnv.AGORA_APP_CERTIFICATE) {
-  fail('Missing .env.local. Copy .env.local.example to .env.local or set AGORA_APP_ID and AGORA_APP_CERTIFICATE in the environment.')
-}
-
-for (const key of ['AGORA_APP_ID', 'AGORA_APP_CERTIFICATE']) {
-  if (!mergedEnv[key]?.trim()) {
-    fail(`Missing ${key}. Set it in .env.local or the environment before running the standalone web client.`)
-  }
-}
-
-console.log('Doctor checks passed for standalone web mode')
+console.log(`Doctor checks passed for Python-backed web proxy mode (${backendUrl})`)
