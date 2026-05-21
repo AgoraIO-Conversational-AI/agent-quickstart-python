@@ -12,8 +12,10 @@ env/
 ENV/
 .venv
 
-# Node
+# Node (this repo standardizes on Bun; do not commit npm/pnpm lockfiles)
 node_modules/
+package-lock.json
+pnpm-lock.yaml
 dist/
 .cache/
 

@@ -1,17 +1,17 @@
 # Agora Conversational AI Demo — Architecture
 
-This quickstart supports two runtime environments. The UI is the same in both modes, but the owner of `/api/*` changes by environment.
+This quickstart keeps the web UI and backend responsibilities separate. The Next.js app owns the browser-facing `/api/*` URLs, and `next.config.ts` rewrites them to the Python FastAPI service that owns token generation and agent lifecycle.
 
-## Local Python-Backed Development
+## Python-Backed Request Flow
 
 ```
 Browser
   ↓
-Next.js app on :3000
+Next.js app
   ↓
-/api/* route handlers proxy through AGENT_BACKEND_URL
+/api/* rewrites through AGENT_BACKEND_URL
   ↓
-FastAPI service on :8000
+FastAPI service
   ↓
 Agora Cloud Services
 ```
@@ -19,21 +19,6 @@ Agora Cloud Services
 - `web` owns the browser UI and the `/api/*` entrypoints
 - `server` owns the actual token generation and agent start/stop logic
 - this is the mode used by `bun run dev`
-
-## Single-Target Web Deployment
-
-```
-Browser
-  ↓
-Next.js app
-  ↓
-/api/* route handlers run in-process
-  ↓
-Agora Cloud Services
-```
-
-- `web` owns both the UI and the deployed `/api/*` implementation
-- `server` is not required for this deployment path
 
 ## Shared Conversation Flow
 
@@ -48,7 +33,7 @@ Frontend: GET /api/get_config
 ### 2. Agent Start
 
 ```
-Frontend: POST /api/v2/startAgent { channelName, rtcUid, userUid }
+Frontend: POST /api/startAgent { channelName, rtcUid, userUid }
   → Build agent session
   → Scope remote_uids to the requesting user
   → Start session and return agent_id
@@ -66,7 +51,7 @@ User audio → RTC
 ### 4. Agent Stop
 
 ```
-Frontend: POST /api/v2/stopAgent { agentId }
+Frontend: POST /api/stopAgent { agentId }
   → Stop session directly or through stateless fallback
   → Client cleans up RTC and RTM state
 ```
@@ -76,10 +61,10 @@ Frontend: POST /api/v2/stopAgent { agentId }
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/get_config` | GET | Generate connection config (Token007, channel, UIDs) |
-| `/v2/startAgent` | POST | Start the agent session |
-| `/v2/stopAgent` | POST | Stop the agent by `agent_id` |
+| `/startAgent` | POST | Start the agent session |
+| `/stopAgent` | POST | Stop the agent by `agent_id` |
 
-Frontend calls these as `/api/*`. In local Python mode, the Next handlers proxy to `AGENT_BACKEND_URL`; in Vercel they run in-process inside the Next app.
+Frontend calls these as `/api/*`. Next rewrites those calls to `AGENT_BACKEND_URL`; the Next app does not run token or AgentKit logic in-process.
 
 ## Authentication
 
@@ -87,7 +72,7 @@ Token007 (AccessToken2) — generated from `AGORA_APP_ID` + `AGORA_APP_CERTIFICA
 
 ## Detailed Documentation
 
-- [web/ARCHITECTURE.md](./web/ARCHITECTURE.md) — Frontend architecture, components, state management
-- [server/ARCHITECTURE.md](./server/ARCHITECTURE.md) — Backend architecture, endpoints, AI provider config
+- [docs/ai/L1/02_architecture.md](./docs/ai/L1/02_architecture.md) — web ↔ FastAPI topology, rewrites, lifecycle
+- [docs/ai/L1/03_code_map.md](./docs/ai/L1/03_code_map.md) — where code lives under `web/` and `server/`
 - [AGENTS.md](./AGENTS.md) — AI agent development guide
 - [README.md](./README.md) — Quick start, configuration, deployment

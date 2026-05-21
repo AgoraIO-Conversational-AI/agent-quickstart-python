@@ -4,8 +4,8 @@ Agora Agent & Token Service
 
 HTTP APIs:
 - GET  /get_config     -> Agent.generate_config()
-- POST /v2/startAgent  -> Agent.start()
-- POST /v2/stopAgent   -> Agent.stop()
+- POST /startAgent     -> Agent.start()
+- POST /stopAgent      -> Agent.stop()
 """
 import logging
 import os
@@ -78,7 +78,7 @@ router = APIRouter()
 
 # Request models
 class StartAgentRequest(BaseModel):
-    """Request body for POST /v2/startAgent"""
+    """Request body for POST /startAgent"""
     channelName: str
     rtcUid: int
     userUid: int
@@ -86,7 +86,7 @@ class StartAgentRequest(BaseModel):
 
 
 class StopAgentRequest(BaseModel):
-    """Request body for POST /v2/stopAgent"""
+    """Request body for POST /stopAgent"""
     agentId: str
 
 
@@ -108,7 +108,9 @@ async def get_config(
         )
 
     try:
-        user_uid = uid or random.randint(1000, 9999999)
+        # Agora RTC accepts uid=0 as "auto assign", but RTM token subjects cannot
+        # use 0. Replace missing, zero, or negative values with a generated UID.
+        user_uid = random.randint(1000, 9999999) if uid is None or uid <= 0 else uid
         agent_uid = str(random.randint(10000000, 99999999))
         channel_name = channel or _generate_channel_name()
 
@@ -143,7 +145,7 @@ async def get_config(
         raise _to_http_error(e)
 
 
-@router.post("/v2/startAgent")
+@router.post("/startAgent")
 async def start_agent(request: StartAgentRequest):
     """Start agent in a channel"""
     if agent is None:
@@ -166,7 +168,7 @@ async def start_agent(request: StartAgentRequest):
         return {"code": 0, "msg": "success", "data": result}
     except Exception as e:
         _log_route_error(
-            "/v2/startAgent",
+            "/startAgent",
             e,
             channelName=request.channelName,
             rtcUid=request.rtcUid,
@@ -175,7 +177,7 @@ async def start_agent(request: StartAgentRequest):
         raise _to_http_error(e)
 
 
-@router.post("/v2/stopAgent")
+@router.post("/stopAgent")
 async def stop_agent(request: StopAgentRequest):
     """Stop agent by ID"""
     if agent is None:
@@ -188,7 +190,7 @@ async def stop_agent(request: StopAgentRequest):
         await agent.stop(request.agentId)
         return {"code": 0, "msg": "success"}
     except Exception as e:
-        _log_route_error("/v2/stopAgent", e, agentId=request.agentId)
+        _log_route_error("/stopAgent", e, agentId=request.agentId)
         raise _to_http_error(e)
 
 

@@ -26,7 +26,7 @@ Examples:
 2. RTC Integration → Join audio channel (useJoin + usePublish from agora-rtc-react)
 3. RTM Integration → Login + Subscribe message channel
 4. AgoraVoiceAI → Init + subscribeMessage (from agora-agent-client-toolkit)
-5. Start Agent (Backend API: /api/v2/startAgent)
+5. Start Agent (Backend API: /api/startAgent)
 ```
 
 ## Complete Connection Flow

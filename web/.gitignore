@@ -1,5 +1,7 @@
-# Dependencies
+# Dependencies (use Bun; do not commit npm/pnpm lockfiles)
 node_modules
+package-lock.json
+pnpm-lock.yaml
 .pnp
 .pnp.js
 
