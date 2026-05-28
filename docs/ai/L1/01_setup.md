@@ -66,7 +66,7 @@ fastapi>=0.100.0
 uvicorn>=0.20.0
 requests>=2.31.0
 python-dotenv>=1.0.0
-agora-agent-server-sdk
+agora-agents
 ```
 
 The SDK pin is intentionally open — pin if you need reproducibility.

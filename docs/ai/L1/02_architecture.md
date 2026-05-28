@@ -67,7 +67,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 `server/src/agent.py`:
 
 - `get_config` treats missing, zero, and negative UIDs as "generate a usable UID" before minting an RTC+RTM token.
-- `Agent.start(channel_name, rtc_uid, user_uid)` uses the module-level `AsyncAgora` client, builds `AgoraAgent` from `agora-agent-server-sdk`, and creates an async session.
+- `Agent.start(channel_name, rtc_uid, user_uid)` uses the module-level `AsyncAgora` client, builds `AgoraAgent` from `agora-agents` (`agora_agent`), and creates an async session.
 - `Agent.stop(agent_id)` ends the session.
 
 ## Managed Agent Defaults (server/src/agent.py)

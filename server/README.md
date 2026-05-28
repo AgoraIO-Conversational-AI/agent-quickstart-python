@@ -141,7 +141,7 @@ The repo-level `bun run verify:local:fastapi` check exercises this FastAPI app t
 
 ## SDK
 
-This project uses `agora-agent-server-sdk`:
+This project uses `agora-agents` (import `agora_agent`):
 - Package: `agora_agent`
 - Agent builder: `agora_agent.agentkit.Agent` with fluent `.with_llm()` / `.with_tts()` / `.with_stt()` API
 - Default vendors: `DeepgramSTT`, `OpenAI`, `MiniMaxTTS` from `agora_agent.agentkit.vendors`

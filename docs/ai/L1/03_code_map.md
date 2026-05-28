@@ -55,7 +55,7 @@ web/                      # Next.js 16 app (workspace member)
   docs/                   # Workflow + review + project state templates
 
 server/                   # Python FastAPI backend
-  requirements.txt        # fastapi, uvicorn, requests, dotenv, agora-agent-server-sdk
+  requirements.txt        # fastapi, uvicorn, requests, dotenv, agora-agents
   .env.example
   README.md
   src/
