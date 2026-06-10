@@ -24,6 +24,9 @@ dist/
 .env.local
 .env.*.local
 
+# Agora CLI local project binding
+.agora/
+
 # IDE
 .vscode/
 .idea/
