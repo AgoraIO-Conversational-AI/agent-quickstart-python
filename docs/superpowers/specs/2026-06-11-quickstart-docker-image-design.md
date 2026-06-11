@@ -30,6 +30,17 @@ removes that requirement entirely:
 The frontend still runs the normal way (`bun run dev`, or a Next deploy); it is simply not
 part of this container image. The image is a deploy-shaped artifact for the backend half.
 
+## Locked decisions (grill 2026-06-11)
+
+1. **Server-only image** — no web frontend, so no `web/next.config.ts` change.
+2. **amd64-only** (`platforms: linux/amd64`) — the `load: true` smoke path requires a single
+   arch; arm64 users run under emulation. No multi-arch push.
+3. **Non-root `USER app`** — strictly better default for a fresh image; a few extra Dockerfile
+   lines, no runtime cost.
+4. **Keep GHCR tag-push** — build+smoke on every push/PR, publish only on `v*` tags. The image
+   is undocumented (CI-only) but still produced on releases.
+5. **CI-only, no docs** — no README / `docs/ai/` changes; therefore no L0 `Last Reviewed` bump.
+
 ## Layout
 
 ```
@@ -47,14 +58,21 @@ No changes to `web/`, `server/src/`, or any docs (CI-only, per the locked decisi
 ```dockerfile
 # syntax=docker/dockerfile:1
 FROM python:3.12-slim-bookworm AS runtime
+
+# Run as a non-root user (created before any COPY so --chown can reference it).
+RUN useradd --create-home --uid 10001 app
 WORKDIR /app
 
-# Python dependencies for the FastAPI backend.
+# Python dependencies for the FastAPI backend (installed as root into the
+# system site-packages, which is world-readable for the app user at runtime).
 COPY server/requirements.txt /tmp/server-req.txt
 RUN pip install --no-cache-dir -r /tmp/server-req.txt
 
-# Backend source.
-COPY server/src /app/server/src
+# Backend source, owned by the runtime user.
+COPY --chown=app:app server/src /app/server/src
+
+# Drop privileges for the running process.
+USER app
 
 # server.py reads $PORT (default 8000) and binds 0.0.0.0.
 EXPOSE 8000
@@ -66,6 +84,9 @@ Notes:
   so the `CMD` needs no wrapper. Binding `0.0.0.0` is what makes the mapped port reachable.
 - `python:3.12-slim-bookworm` is within the documented floor (≥ 3.10); the app is
   version-agnostic across 3.10–3.13, so a stable slim base is all that matters here.
+- **Non-root:** `pip install` runs as root (writes to `/usr/local`, world-readable), then
+  `USER app` drops privileges before `CMD`. Ports 8000 (> 1024) need no privilege, so the
+  unprivileged user binds fine.
 
 ### `.dockerignore`
 
