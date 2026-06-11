@@ -1,14 +1,14 @@
 # Agora Conversational AI Python Quickstart
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Python](https://img.shields.io/badge/python-%3E%3D3.8-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/)
 [![Bun](https://img.shields.io/badge/bun-latest-black)](https://bun.sh/)
 
 Build a production-style voice agent with a Next.js web client and Python FastAPI backend. This quickstart includes live transcript, agent visualizer ([Agent UIKit](https://agoraio-conversational-ai.github.io/agent-uikit/)), and managed STT/LLM/TTS defaults.
 
 ## Prerequisites
 
-- [Python 3.8+](https://www.python.org/)
+- [Python 3.10+](https://www.python.org/)
 - [Bun](https://bun.sh/)
 - [Agora CLI](https://github.com/AgoraIO/cli)
 
@@ -116,6 +116,8 @@ bun run verify
 ```
 
 Run `bun run verify` before shipping web-only changes, and `bun run verify:local` when backend behavior changed.
+
+Tests run standalone (no Agora cloud needed): `pytest` in `server/`, `bun test` in `web/`. CI runs them on Linux/macOS/Windows × Python 3.10 & 3.13.
 
 ## Architecture
 

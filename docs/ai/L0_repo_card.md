@@ -8,10 +8,10 @@
 | ------------- | -------------------------------------------------------------------- |
 | Repo          | `AgoraIO-Conversational-AI/agent-quickstart-python`                  |
 | Type          | `distributed-system` (single repo, two co-located processes)         |
-| Language      | Python 3.8+ (FastAPI + uvicorn) backend + Next.js 16 / React 19 web  |
+| Language      | Python 3.10+ (FastAPI + uvicorn) backend + Next.js 16 / React 19 web  |
 | Deploy Target | `web/` as Next.js app, `server/` as a reachable FastAPI service      |
 | Owner         | Agora Conversational AI DevEx                                        |
-| Last Reviewed | 2026-05-28                                                           |
+| Last Reviewed | 2026-06-11                                                           |
 | Recipe Role   | `base`                                                               |
 | Recipe Version | `1.0.0`                                                             |
 | Recipe Status | `experimental`                                                       |

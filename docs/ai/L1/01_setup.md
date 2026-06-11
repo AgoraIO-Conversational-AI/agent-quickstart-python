@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- **Python** ≥ 3.8 (README + `server/README.md`).
+- **Python** ≥ 3.10 (README + `server/README.md`).
 - **bun** as the JS toolchain (root `package.json` scripts and root `bun.lock`).
 - **pip** + `venv` for Python dependencies. No `pyproject.toml` is present.
 - Agora project with App ID + App Certificate.
@@ -106,7 +106,7 @@ bun run clean                  # remove backend venv, node_modules, .next, web/d
 
 ## Common Setup Failures
 
-- `bun run doctor:local` fails on **"python3 not found"** → install Python ≥ 3.8.
+- `bun run doctor:local` fails on **"python3 not found"** → install Python ≥ 3.10.
 - Doctor fails on missing `server/.env.local` → run `bun run setup:env` or copy from `server/.env.example`.
 - `cd web && bun run doctor` rejects empty/invalid `AGENT_BACKEND_URL` → ensure the URL is `http://` or `https://`.
 - `verify:web:api` fails on a new route → extend `web/scripts/verify-api-contracts.ts` to cover it.

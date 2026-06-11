@@ -136,7 +136,7 @@ The repo-level `bun run verify:local:fastapi` check exercises this FastAPI app t
 
 ## Requirements
 
-- Python >= 3.8
+- Python >= 3.10
 - Dependencies listed in `requirements.txt`
 
 ## SDK
