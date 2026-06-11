@@ -45,3 +45,5 @@ yarn-debug.log*
 yarn-error.log*
 
 /.vscode
+# Superpowers workflow docs (specs/plans) — local only, not tracked
+docs/superpowers/
