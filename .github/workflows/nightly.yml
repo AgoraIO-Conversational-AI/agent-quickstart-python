@@ -1,0 +1,17 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "0 18 * * *"   # 18:00 UTC daily
+  workflow_dispatch:        # manual trigger (only available once on the default branch)
+
+permissions:
+  contents: read
+  packages: write           # mirrors docker.yml; unused on the no-push nightly path
+
+jobs:
+  tests:
+    uses: ./.github/workflows/ci.yml
+
+  docker:
+    uses: ./.github/workflows/docker.yml
