@@ -104,6 +104,7 @@ class Agent:
         # )
 
         parameters = {
+            "audio_scenario": "chorus",  # web client → ultra-low-latency chorus profile
             "data_channel": "rtm",
             "enable_error_message": True,
             "enable_metrics": True,
