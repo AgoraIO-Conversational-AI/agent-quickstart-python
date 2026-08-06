@@ -33,7 +33,11 @@ import {
 	TranscriptHelperMode,
 	type UserTranscription,
 } from "agora-agent-client-toolkit";
-import { AgentVisualizer } from "agora-agent-uikit";
+import {
+	AgentVisualizer,
+	AvatarVideoDisplay,
+	type AvatarVideoState,
+} from "agora-agent-uikit";
 import { MicButtonWithVisualizer } from "agora-agent-uikit/rtc";
 import {
 	RemoteUser,
@@ -384,6 +388,23 @@ export default function ConversationComponent({
 		[agentState, isAgentConnected, connectionState],
 	);
 
+	const avatarRemoteUser = useMemo(
+		() =>
+			remoteUsers.find(
+				(user) =>
+					Boolean(user.videoTrack) && user.uid.toString() !== agentUID,
+			) ??
+			remoteUsers.find((user) => Boolean(user.videoTrack)) ??
+			null,
+		[remoteUsers, agentUID],
+	);
+
+	const avatarVideoState = useMemo<AvatarVideoState>(() => {
+		if (avatarRemoteUser?.videoTrack) return "connected";
+		if (isAgentConnected || connectionState === "CONNECTED") return "loading";
+		return "disconnected";
+	}, [avatarRemoteUser, isAgentConnected, connectionState]);
+
 	const handleMicToggle = useCallback(async () => {
 		const next = !isEnabled;
 		const track = localMicrophoneTrack;
@@ -456,9 +477,21 @@ export default function ConversationComponent({
 			visualizer={
 				<section
 					className="relative flex h-full min-h-[20rem] w-full max-w-4xl items-center justify-center"
-					aria-label="AI agent status visualization"
+					aria-label="AI agent avatar"
 				>
-					<AgentVisualizer state={visualizerState} size="lg" />
+					<AvatarVideoDisplay
+						videoTrack={avatarRemoteUser?.videoTrack ?? null}
+						state={avatarVideoState}
+						showStatus
+						useMediaStream
+						objectFit="cover"
+						className="aspect-[3/4] h-full max-h-[36rem] w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card"
+						placeholder={
+							<div className="flex h-full w-full items-center justify-center">
+								<AgentVisualizer state={visualizerState} size="lg" />
+							</div>
+						}
+					/>
 					{remoteUsers.map((user) => (
 						<div key={user.uid} className="hidden">
 							<RemoteUser user={user} />

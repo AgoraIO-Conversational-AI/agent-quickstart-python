@@ -5,12 +5,13 @@ High-level API for managing Agora Conversational AI Agents.
 """
 import logging
 import os
-import time
+import random
 from typing import Any, Dict, Optional
 
 from agora_agent import Area, AsyncAgora
 from agora_agent.agentkit import Agent as AgoraAgent
-from agora_agent.agentkit.vendors import DeepgramSTT, MiniMaxTTS, OpenAI
+from agora_agent.agentkit.token import generate_convo_ai_token
+from agora_agent.agentkit.vendors import AnamAvatar, DeepgramSTT, MiniMaxTTS, OpenAI
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -20,6 +21,9 @@ Agora is a real-time communications company. The product you represent is the Ag
 
 If you do not know a specific fact about Agora, say so plainly and suggest checking docs.agora.io. Keep most replies to one or two sentences unless the user explicitly asks for more detail.
 """
+
+# Anam avatar lip-sync expects 24 kHz TTS (see Agora Anam avatar docs).
+ANAM_TTS_SAMPLE_RATE = 24000
 
 
 class Agent:
@@ -37,6 +41,8 @@ class Agent:
             "AGENT_GREETING",
             "Hi there! I'm Ada, your virtual assistant from Agora. How can I help?",
         )
+        self.anam_api_key = (os.getenv("ANAM_API_KEY") or "").strip()
+        self.anam_avatar_id = (os.getenv("ANAM_AVATAR_ID") or "").strip()
 
         if not self.app_id or not self.app_certificate:
             raise ValueError("AGORA_APP_ID and AGORA_APP_CERTIFICATE are required")
@@ -49,6 +55,46 @@ class Agent:
 
         # Track active sessions by agent_id
         self._sessions: Dict[str, Any] = {}
+
+    def _build_anam_avatar(
+        self, channel_name: str, agent_uid: int, user_uid: int
+    ) -> Optional[AnamAvatar]:
+        if not self.anam_api_key:
+            if self.anam_avatar_id:
+                logger.warning(
+                    "ANAM_AVATAR_ID is set but ANAM_API_KEY is missing; starting without avatar"
+                )
+            return None
+        if not self.anam_avatar_id:
+            logger.warning(
+                "ANAM_API_KEY is set but ANAM_AVATAR_ID is missing; starting without avatar"
+            )
+            return None
+
+        # Avatar must publish under a UID distinct from the agent and the user.
+        avatar_uid = random.randint(200000000, 299999999)
+        while avatar_uid in {agent_uid, user_uid}:
+            avatar_uid = random.randint(200000000, 299999999)
+
+        avatar_token = generate_convo_ai_token(
+            app_id=self.app_id,
+            app_certificate=self.app_certificate,
+            channel_name=channel_name,
+            uid=avatar_uid,
+            token_expire=3600,
+        )
+
+        return AnamAvatar(
+            api_key=self.anam_api_key,
+            avatar_id=self.anam_avatar_id,
+            additional_params={
+                "agora_uid": str(avatar_uid),
+                "agora_token": avatar_token,
+                "sample_rate": ANAM_TTS_SAMPLE_RATE,
+                "quality": "high",
+                "video_encoding": "H264",
+            },
+        )
 
     async def start(
         self,
@@ -76,7 +122,13 @@ class Agent:
             top_p=0.95,
         )
         stt = DeepgramSTT(model="nova-3", language="en")
-        tts = MiniMaxTTS(model="speech_2_6_turbo", voice_id="English_captivating_female1")
+        anam_avatar = self._build_anam_avatar(channel_name, agent_uid, user_uid)
+        tts = MiniMaxTTS(
+            model="speech_2_6_turbo",
+            voice_id="English_captivating_female1",
+            # Match Anam's default avatar sample_rate when avatar is enabled.
+            sample_rate=ANAM_TTS_SAMPLE_RATE if anam_avatar else None,
+        )
 
         # Optional BYOK example: replace the STT block above and set DEEPGRAM_API_KEY.
         # stt = DeepgramSTT(api_key=os.getenv("DEEPGRAM_API_KEY"), model="nova-3", language="en")
@@ -144,6 +196,13 @@ class Agent:
             .with_llm(llm)
             .with_tts(tts)
         )
+        if anam_avatar is not None:
+            agora_agent = agora_agent.with_avatar(anam_avatar)
+            logger.info(
+                "Anam avatar enabled avatar_id=%s channel=%s",
+                self.anam_avatar_id,
+                channel_name,
+            )
 
         session = agora_agent.create_async_session(
             channel=channel_name,
