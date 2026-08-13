@@ -12,6 +12,10 @@
 
 `bun run dev` always exports `AGENT_BACKEND_URL=http://localhost:8000`. Deploy hosts must set it manually.
 
+## Root Scripts Are Cross-Platform
+
+Root `package.json` scripts must not rely on POSIX-only commands such as `bash`, `test`, `source`, `rm -rf`, or `python3`. Put filesystem, venv, environment-variable, and process-spawn logic in `scripts/run.mjs` so `bun run dev`, setup, doctor, verify, and clean keep working on Windows PowerShell/cmd as well as POSIX shells.
+
 ## No `web/app/api/**/route.ts`
 
 `web/scripts/verify-api-contracts.ts` asserts that no `app/api` route handlers exist. The web client must be rewrite-only. Adding a Next route handler would:

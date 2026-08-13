@@ -12,6 +12,7 @@ ARCHITECTURE.md           # Top-level environment model
 AGENTS.md                 # Contributor entry point
 CLAUDE.md                 # Pointer to AGENTS.md
 LICENSE
+scripts/run.mjs           # Cross-platform root command runner for setup/dev/doctor/clean
 
 web/                      # Next.js 16 app (workspace member)
   app/
@@ -70,7 +71,7 @@ server/                   # Python FastAPI backend
 
 | File                                                | Purpose                                                                  |
 | --------------------------------------------------- | ------------------------------------------------------------------------ |
-| `package.json` (root)                               | `concurrently`-driven dev orchestration; every workflow script.          |
+| `package.json` (root)                               | `concurrently`-driven dev orchestration; delegates cross-platform workflow steps to `scripts/run.mjs`. |
 | `web/next.config.ts`                                | Rewrites `/api/*` to `${AGENT_BACKEND_URL}/...` when env is set.         |
 | `web/src/services/api.ts`                           | Browser API client: `getConfig`, `startAgent`, `stopAgent`.              |
 | `web/src/components/LandingPage.tsx`                | Session bootstrap, RTM login, renewal handler, provider wiring.          |

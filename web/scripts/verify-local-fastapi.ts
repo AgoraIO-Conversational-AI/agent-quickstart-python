@@ -95,13 +95,19 @@ async function waitForHealthyBackend(baseUrl: string, timeoutMs: number) {
   throw new Error(`Timed out waiting for FastAPI backend: ${lastError}`)
 }
 
+function resolveVenvPython(serverRoot: string) {
+  return process.platform === 'win32'
+    ? path.join(serverRoot, 'venv', 'Scripts', 'python.exe')
+    : path.join(serverRoot, 'venv', 'bin', 'python')
+}
+
 async function main() {
   const projectRoot = process.cwd()
   const serverRoot = path.resolve(projectRoot, '..', 'server')
-  const venvPython = path.join(serverRoot, 'venv', 'bin', 'python')
+  const venvPython = resolveVenvPython(serverRoot)
 
   if (!existsSync(venvPython)) {
-    throw new Error('Missing server/venv/bin/python. Run bun run setup:backend before verify:local.')
+    throw new Error('Missing server/venv Python. Run bun run setup:backend before verify:local.')
   }
 
   const dependencyCheck = bunRuntime.Bun.spawnSync({
