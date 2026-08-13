@@ -51,7 +51,7 @@ Purpose: exercise the **real FastAPI app** locally, with a `FakeAgent` substitut
 
 What it does:
 
-1. Spawns `python3 server/scripts/run_fake_server.py`, which:
+1. Spawns `server/scripts/run_fake_server.py` with the `server/venv` Python (`bin/python` on Unix, `Scripts/python.exe` on Windows), which:
    - Imports `server.src.server` so the `app` and `agent` module-level singleton exist.
    - Replaces `server_module.agent` with a `FakeAgent` instance.
    - Runs `uvicorn.run(app, ...)` on a known port.
@@ -62,7 +62,7 @@ This is the closest CI gets to a full integration test. It never makes outbound 
 
 ## `py_compile` Verification
 
-`bun run verify:backend` runs `python3 -m py_compile server/src/server.py server/src/agent.py`. It catches:
+`bun run verify:backend` runs `scripts/run.mjs verify:backend`, which uses the venv Python when present or a system Python fallback to compile `server/src/server.py` and `server/src/agent.py`. It catches:
 
 - Syntax errors.
 
@@ -90,7 +90,7 @@ It does **not** execute module imports, load env, or catch logic regressions. Pa
 | `verify-api-contracts` fails on "app/api should not exist"        | Someone added a Next route handler — remove it.                       |
 | `verify-local-proxy` hangs on `fetch`                             | Fake server failed to start; check the script's stderr.              |
 | `verify-local-fastapi` errors on import                           | `Agent.__init__` failed (env missing or SDK import error).            |
-| `verify-backend` reports a syntax error                           | Run `python3 -m py_compile` directly on the offending file.          |
+| `verify-backend` reports a syntax error                           | Run `bun run verify:backend` or `python -m py_compile` directly on the offending file. |
 
 ## See Also
 

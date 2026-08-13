@@ -12,6 +12,8 @@ Build a production-style voice agent with a Next.js web client and Python FastAP
 - [Bun](https://bun.sh/)
 - [Agora CLI](https://github.com/AgoraIO/cli)
 
+On Windows, install Python on `PATH` as `python` or use the Python launcher (`py -3`). The root `bun run ...` scripts create and use `server/venv` without requiring `bash`, `python3`, or POSIX `source`.
+
 ## Run It
 
 Install the CLI (skip if already installed), scaffold the Python quickstart, install dependencies, and run.

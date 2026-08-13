@@ -55,8 +55,8 @@ bun run verify:local        # full chain including backend + fastapi + proxy + b
 ```bash
 bun run dev
 # concurrently {
-#   dev:backend  → python3 server/src/server.py
-#   dev:frontend → cd web && AGENT_BACKEND_URL=http://localhost:8000 bun run dev
+#   dev:backend  → scripts/run.mjs creates/reuses server/venv and runs server/src/server.py
+#   dev:frontend → scripts/run.mjs starts web with AGENT_BACKEND_URL=http://localhost:8000
 # }
 ```
 

@@ -6,7 +6,7 @@
 
 - **Python** ≥ 3.10 (README + `server/README.md`).
 - **bun** as the JS toolchain (root `package.json` scripts and root `bun.lock`).
-- **pip** + `venv` for Python dependencies. No `pyproject.toml` is present.
+- **pip** + `venv` for Python dependencies. No `pyproject.toml` is present. Root scripts use `python3`/`python` on Unix and `python`/`py -3` on Windows.
 - Agora project with App ID + App Certificate.
 
 ## Install
@@ -14,7 +14,7 @@
 ```bash
 bun install                # JS deps for the workspace, including web/
 cd server
-python3 -m venv venv       # canonical name; matches package.json scripts
+python3 -m venv venv       # Unix; use python -m venv venv on Windows
 source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -27,6 +27,8 @@ bun run setup
 ```
 
 `setup:env` copies `server/.env.example` → `server/.env.local` if missing. `setup:backend` recreates `server/venv`, upgrades pip, and installs `requirements.txt`. `setup:frontend` runs `bun install`. `setup:deps` exists for `bun run dev:check`, not for `bun run setup`.
+
+Root `package.json` delegates filesystem, venv, Python, env-var injection, and cleanup steps to `scripts/run.mjs` so the same commands work in POSIX shells and Windows PowerShell/cmd.
 
 > The package.json scripts use `server/venv/` (no leading dot). `bun run dev:backend` activates `server/venv` and runs `python src/server.py` from inside `server/`. If you create the venv under a different name you'll need to adjust the scripts or symlink.
 
@@ -75,10 +77,10 @@ The SDK is lower-bounded at v2 — add an upper bound or exact pin if you need r
 
 ```bash
 bun run dev                    # setup:env → setup:deps → concurrently {backend, frontend}
-bun run dev:backend            # python3 server/src/server.py
-bun run dev:frontend           # cd web && AGENT_BACKEND_URL=http://localhost:8000 bun run dev
+bun run dev:backend            # creates/reuses server/venv and runs server/src/server.py
+bun run dev:frontend           # starts web with AGENT_BACKEND_URL=http://localhost:8000
 bun run doctor                 # bun + node_modules sanity
-bun run doctor:local           # adds python3 + .env.local + AGORA_* presence
+bun run doctor:local           # adds Python + .env.local + AGORA_* presence
 bun run build                  # bun --filter web build
 bun run verify                 # doctor + verify:web:api + verify:web:build
 bun run verify:local           # doctor:local + verify:backend + verify:local:fastapi + verify:web:proxy + verify:web:build
@@ -96,7 +98,7 @@ bun run clean                  # remove backend venv, node_modules, .next, web/d
 | Command                       | Live Agora? | Notes                                                |
 | ----------------------------- | ----------- | ---------------------------------------------------- |
 | `bun run doctor`              | No          | bun + node_modules sanity                            |
-| `bun run doctor:local`        | No          | Adds python3 + env presence                          |
+| `bun run doctor:local`        | No          | Adds Python + env presence                           |
 | `bun run verify:web:api`      | No          | Contract harness with mocked SDK                     |
 | `bun run verify:web:proxy`    | No          | Static fake-server smoke                             |
 | `bun run verify:local:fastapi`| No          | Boots `server/scripts/run_fake_server.py`            |
@@ -106,7 +108,7 @@ bun run clean                  # remove backend venv, node_modules, .next, web/d
 
 ## Common Setup Failures
 
-- `bun run doctor:local` fails on **"python3 not found"** → install Python ≥ 3.10.
+- `bun run doctor:local` fails on **"Python 3.10+ was not found"** → install Python ≥ 3.10 or set `PYTHON` to its executable path.
 - Doctor fails on missing `server/.env.local` → run `bun run setup:env` or copy from `server/.env.example`.
 - `cd web && bun run doctor` rejects empty/invalid `AGENT_BACKEND_URL` → ensure the URL is `http://` or `https://`.
 - `verify:web:api` fails on a new route → extend `web/scripts/verify-api-contracts.ts` to cover it.

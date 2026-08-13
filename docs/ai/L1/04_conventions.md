@@ -8,11 +8,11 @@
 | -------------- | -------------------------------------------------------------------------------------- |
 | Python format  | None enforced in-repo. Match existing style; `ruff`/`black` are not configured.        |
 | Python verify  | `py_compile` over `server/src/*.py` (`bun run verify:backend`).                        |
-| Python deps    | `pip install -r server/requirements.txt` inside `server/venv` (created by `bun run setup:backend`). |
+| Python deps    | `pip install -r server/requirements.txt` inside `server/venv` (created by `bun run setup:backend`; Windows uses `python` / `py -3`). |
 | TypeScript     | `strict: true` in `web/tsconfig.json`; path alias `@/* → ./src/*`.                     |
 | Linter         | Biome (`web/biome.json`); `noExplicitAny` off, `useExhaustiveDependencies` off.        |
 | Format         | Biome (`bun run lint:fix` writes).                                                     |
-| JS orchestration | bun (root `package.json` `concurrently`, `bun --filter web …`).                       |
+| JS orchestration | bun (root `package.json` `concurrently`, `scripts/run.mjs`, `bun --filter web …`).    |
 
 There is **no ESLint config file** in `web/` — Biome is the only TS/JS linter.
 
@@ -68,6 +68,7 @@ There is **no ESLint config file** in `web/` — Biome is the only TS/JS linter.
 - Components: PascalCase `.tsx` (e.g. `ConversationComponent.tsx`).
 - UI primitives: lowercase under `ui/` (e.g. `ui/button.tsx`).
 - Scripts: kebab-case (`verify-api-contracts.ts`, `verify-local-fastapi.ts`).
+- Root orchestration scripts stay in `scripts/run.mjs` when they need filesystem, env-var, venv, or process-spawn behavior that must work on Windows and POSIX.
 - Python modules: snake_case (`server.py`, `agent.py`, `run_fake_server.py`).
 
 ## Module Discipline
