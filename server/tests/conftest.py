@@ -1,9 +1,8 @@
 """Shared fixtures for the server test suite.
 
 Standalone: no Agora cloud, no real credentials. A deterministic fake env is
-injected, and python-dotenv is neutralized so a developer's real
-`server/.env.local` cannot override the test env (server.py loads it with
-override=True).
+injected, and python-dotenv is neutralized so a developer's real `server/.env`
+cannot override the test env (server.py loads it with override=True).
 """
 import importlib
 import os

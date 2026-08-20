@@ -57,7 +57,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 
 - `FastAPI(title="...", version="2.0.0")`.
 - `CORSMiddleware` with `allow_origins=["*"]`, `allow_credentials=True`.
-- Reads `server/.env.local` then `server/.env` via `python-dotenv` at startup, resolved relative to `server/src/server.py`.
+- Reads `server/.env` via `python-dotenv` at startup, resolved relative to `server/src/server.py`.
 - Constructs a single `Agent` instance at import time (`agent = Agent()`).
 - Routes registered on an `APIRouter`: `GET /get_config`, `POST /startAgent`, `POST /stopAgent`.
 - All responses use the envelope `{ "code": 0, "msg": "success", "data": ... }`.

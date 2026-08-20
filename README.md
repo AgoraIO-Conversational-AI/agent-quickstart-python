@@ -46,7 +46,7 @@ cd agent-quickstart-python
 agora login
 agora project use <your-project>
 bun run setup
-agora project env write server/.env.local
+agora quickstart env write .
 bun run doctor:local
 bun run dev
 ```
@@ -79,8 +79,8 @@ To export local env values from the Agora CLI-bound project:
 
 ```bash
 agora project use <your-project>
-agora project env write server/.env.local
-rg "^(AGORA_APP_ID|AGORA_APP_CERTIFICATE)=" server/.env.local
+agora quickstart env write .
+rg "^(AGORA_APP_ID|AGORA_APP_CERTIFICATE)=" server/.env
 ```
 
 ## Environment variables
@@ -153,8 +153,8 @@ The browser talks to Next.js `/api/*` routes. In local mode, Next rewrites those
 ## Troubleshooting
 
 - **Agent does not join or transcripts are missing:** run `agora project doctor --deep`.
-- **Missing credentials:** run `agora project env write server/.env.local`.
-- **Auth errors from backend:** confirm `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` are set in `server/.env.local`.
+- **Missing credentials:** run `agora quickstart env write .`.
+- **Auth errors from backend:** confirm `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` are set in `server/.env`.
 - **Frontend cannot reach backend:** confirm `AGENT_BACKEND_URL=http://localhost:8000` in local frontend scripts.
 - **Unsure who owns `/api/*`:** Next owns browser-facing `/api/*`; FastAPI owns `/get_config`, `/startAgent`, `/stopAgent`.
 

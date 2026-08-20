@@ -14,9 +14,8 @@ import time
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 
-# Load environment variables from .env.local or .env
+# The Agora CLI writes the Python quickstart environment to server/.env.
 _base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(_base_dir, '.env.local'), override=True)
 load_dotenv(os.path.join(_base_dir, '.env'), override=True)
 
 from fastapi import APIRouter, FastAPI, HTTPException, Query

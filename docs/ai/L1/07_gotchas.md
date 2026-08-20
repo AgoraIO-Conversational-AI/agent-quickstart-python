@@ -64,7 +64,7 @@ The quickstart deliberately uses `generate_convo_ai_token` for both RTC and RTM 
 
 ## Env Loading Is File-Relative
 
-`server.py` derives the `server/` directory from `__file__` and loads `server/.env.local` then `server/.env`. Running from the repo root still finds those files; missing `AGORA_APP_ID` or `AGORA_APP_CERTIFICATE` leaves `agent = None` and routes return `500`.
+`server.py` derives the `server/` directory from `__file__` and loads `server/.env`. Running from the repo root still finds that file; missing `AGORA_APP_ID` or `AGORA_APP_CERTIFICATE` leaves `agent = None` and routes return `500`.
 
 ## `server/scripts/run_fake_server.py` Is for Tests Only
 

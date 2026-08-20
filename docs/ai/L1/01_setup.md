@@ -26,7 +26,7 @@ bun run setup
 # runs: setup:env → setup:backend → setup:frontend → setup:done
 ```
 
-`setup:env` copies `server/.env.example` → `server/.env.local` if missing. `setup:backend` recreates `server/venv`, upgrades pip, and installs `requirements.txt`. `setup:frontend` runs `bun install`. `setup:deps` exists for `bun run dev:check`, not for `bun run setup`.
+`setup:env` copies `server/.env.example` → `server/.env` if missing. It preserves an existing `server/.env` written by `agora init` or `agora quickstart env write`. `setup:backend` recreates `server/venv`, upgrades pip, and installs `requirements.txt`. `setup:frontend` runs `bun install`. `setup:deps` exists for `bun run dev:check`, not for `bun run setup`.
 
 > The package.json scripts use `server/venv/` (no leading dot). `bun run dev:backend` activates `server/venv` and runs `python src/server.py` from inside `server/`. If you create the venv under a different name you'll need to adjust the scripts or symlink.
 
@@ -39,13 +39,6 @@ AGORA_APP_ID=your_agora_app_id
 AGORA_APP_CERTIFICATE=your_agora_app_certificate
 AGENT_GREETING=Hi there! I'm Ada, your virtual assistant from Agora. How can I help?
 PORT=8000
-```
-
-`web/.env.local.example`:
-
-```
-# Required: Next rewrites /api/* requests to the Python backend.
-AGENT_BACKEND_URL=http://localhost:8000
 ```
 
 | Variable                 | Process              | Required | Notes                                                                 |
@@ -78,7 +71,7 @@ bun run dev                    # setup:env → setup:deps → concurrently {back
 bun run dev:backend            # python3 server/src/server.py
 bun run dev:frontend           # cd web && AGENT_BACKEND_URL=http://localhost:8000 bun run dev
 bun run doctor                 # bun + node_modules sanity
-bun run doctor:local           # adds python3 + .env.local + AGORA_* presence
+bun run doctor:local           # adds python3 + server/.env + AGORA_* presence
 bun run build                  # bun --filter web build
 bun run verify                 # doctor + verify:web:api + verify:web:build
 bun run verify:local           # doctor:local + verify:backend + verify:local:fastapi + verify:web:proxy + verify:web:build
@@ -107,7 +100,7 @@ bun run clean                  # remove backend venv, node_modules, .next, web/d
 ## Common Setup Failures
 
 - `bun run doctor:local` fails on **"python3 not found"** → install Python ≥ 3.10.
-- Doctor fails on missing `server/.env.local` → run `bun run setup:env` or copy from `server/.env.example`.
+- Doctor fails on missing `server/.env` → run `agora quickstart env write .` or `bun run setup:env`.
 - `cd web && bun run doctor` rejects empty/invalid `AGENT_BACKEND_URL` → ensure the URL is `http://` or `https://`.
 - `verify:web:api` fails on a new route → extend `web/scripts/verify-api-contracts.ts` to cover it.
 

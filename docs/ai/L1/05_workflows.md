@@ -20,7 +20,7 @@
 Edit `server/src/agent.py`:
 
 - **Prompt:** modify the `ADA_PROMPT` constant.
-- **Greeting:** set `AGENT_GREETING` in `server/.env.local`, or change the default in the constructor.
+- **Greeting:** set `AGENT_GREETING` in `server/.env`, or change the default in the constructor.
 - **VAD:** edit `turn_detection` dict (start/end mode, speech threshold, silence/interrupt durations).
 - **LLM:** change the `OpenAI(...)` constructor (model, history, BYOK key, base URL).
 - **STT:** change the `DeepgramSTT(...)` constructor.

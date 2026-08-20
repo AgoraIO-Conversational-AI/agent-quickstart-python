@@ -1,8 +1,7 @@
 **/venv
 **/node_modules
 **/__pycache__
-*.env.local
-**/.env.local
+**/.env
 **/tests
 docs/
 .github/

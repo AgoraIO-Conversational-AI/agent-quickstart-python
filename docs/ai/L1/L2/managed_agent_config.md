@@ -77,7 +77,7 @@ Edit the `ADA_PROMPT` string constant at the top of `agent.py`. Keep it concise 
 
 ### Change the greeting
 
-Set `AGENT_GREETING` in `server/.env.local`, or change the inline fallback string in `Agent.__init__`.
+Set `AGENT_GREETING` in `server/.env`, or change the inline fallback string in `Agent.__init__`.
 
 ### Change VAD
 
