@@ -57,7 +57,7 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 | ID | Surface | How to extend | Required follow-up |
 | -- | ------- | ------------- | ------------------ |
 | `api.routes` | `server/src/server.py`, `web/next.config.ts`, `web/src/services/api.ts` | Add FastAPI route, add rewrite, add browser fetch helper. | Extend `web/scripts/verify-api-contracts.ts`; add smoke coverage if the route belongs in local verification. |
-| `agent.managed-config` | `server/src/agent.py` | Change `ADA_PROMPT`, `AGENT_GREETING`, `turn_detection`, `OpenAI`, `DeepgramSTT`, `MiniMaxTTS`, `parameters`, or session options. | Run backend compile and local FastAPI smoke checks; document new env vars in `server/.env.example`. |
+| `agent.managed-config` | `server/src/agent.py` | Change `ADA_PROMPT`, `DEFAULT_GREETING`, `turn_detection`, `OpenAI`, `DeepgramSTT`, `MiniMaxTTS`, `parameters`, or session options. | Run backend compile and local FastAPI smoke checks; document new env vars in `server/.env.example`. |
 | `web.conversation-ui` | `web/src/components/*`, `web/src/lib/conversation.ts` | Customize pre-call, transcript, metrics, connection status, microphone, or visualizer UI. | Preserve RTC/RTM lifecycle ownership and transcript UID normalization. |
 | `verification.contracts` | `web/scripts/*.ts`, root `package.json` | Add contract checks for new browser/backend boundaries. | Keep checks runnable without live Agora credentials where possible. |
 
@@ -76,7 +76,7 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 | Contract | Stable shape |
 | -------- | ------------ |
 | Required backend env | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` |
-| Optional backend env | `AGENT_GREETING`, `PORT` |
+| Optional backend env | `PORT` |
 | Required web deploy env | `AGENT_BACKEND_URL` |
 | Optional browser env | `NEXT_PUBLIC_AGENT_UID` |
 | `GET /api/get_config` | Query `channel?`, `uid?`; returns `data.app_id`, `data.token`, `data.uid`, `data.channel_name`, `data.agent_uid`. |

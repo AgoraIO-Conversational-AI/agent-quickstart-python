@@ -15,7 +15,7 @@
 | -------------- | ---------------------------------------------------------------------- |
 | Browser        | `NEXT_PUBLIC_AGENT_UID` (optional)                                     |
 | Next build/run | `AGENT_BACKEND_URL`                                                    |
-| FastAPI        | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `AGENT_GREETING`, `PORT`      |
+| FastAPI        | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `PORT`                         |
 
 Mark `AGORA_APP_CERTIFICATE` as a sensitive secret in whichever host runs the Python service. The certificate value never appears in `web/`.
 

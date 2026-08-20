@@ -72,7 +72,6 @@ Set backend env values:
 ```bash
 AGORA_APP_ID=your_agora_app_id
 AGORA_APP_CERTIFICATE=your_agora_app_certificate
-AGENT_GREETING=optional_custom_greeting
 ```
 
 To export local env values from the Agora CLI-bound project:
@@ -91,7 +90,6 @@ Primary backend env file: [`server/.env.example`](server/.env.example).
 | --- | :---: | :---: | --- |
 | `AGORA_APP_ID` | ✅ | — | Agora Console -> Project -> App ID |
 | `AGORA_APP_CERTIFICATE` | ✅ | — | Agora Console -> Project -> App Certificate (server only) |
-| `AGENT_GREETING` |  | built-in greeting | Optional opening line override |
 | `PORT` |  | `8000` | FastAPI server port |
 | `AGENT_BACKEND_URL` (web deploy) | ✅ | — | Required in deployed `web` app when proxying to external FastAPI |
 

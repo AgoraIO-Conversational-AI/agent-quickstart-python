@@ -35,7 +35,7 @@ CORS middleware: `allow_origins=["*"]`, `allow_credentials=True`.
 | Scope                  | Variable                                  |
 | ---------------------- | ----------------------------------------- |
 | Python server (required) | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` |
-| Python server (optional) | `AGENT_GREETING`, `PORT`                 |
+| Python server (optional) | `PORT`                                   |
 | Next build             | `AGENT_BACKEND_URL`                       |
 | Browser                | `NEXT_PUBLIC_AGENT_UID` (optional)        |
 

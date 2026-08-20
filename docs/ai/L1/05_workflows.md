@@ -20,7 +20,7 @@
 Edit `server/src/agent.py`:
 
 - **Prompt:** modify the `ADA_PROMPT` constant.
-- **Greeting:** set `AGENT_GREETING` in `server/.env`, or change the default in the constructor.
+- **Greeting:** change `DEFAULT_GREETING` in `server/src/agent.py`.
 - **VAD:** edit `turn_detection` dict (start/end mode, speech threshold, silence/interrupt durations).
 - **LLM:** change the `OpenAI(...)` constructor (model, history, BYOK key, base URL).
 - **STT:** change the `DeepgramSTT(...)` constructor.
@@ -33,7 +33,7 @@ After editing, run `bun run verify:backend && bun run verify:web:api`.
 ## Deploy the Web and Backend Separately
 
 - **Web (Next.js):** build via `cd web && bun run build`. Configure `AGENT_BACKEND_URL` on the deploy target to the public URL of your FastAPI service. Serve with `bun run start` or any Node hosting platform.
-- **Backend (FastAPI):** install deps from `server/requirements.txt`, set `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, optional `AGENT_GREETING`/`PORT`, and run `python3 server/src/server.py` or `uvicorn server.src.server:app --host 0.0.0.0 --port $PORT`.
+- **Backend (FastAPI):** install deps from `server/requirements.txt`, set `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, and optionally `PORT`, then run `python3 server/src/server.py` or `uvicorn server.src.server:app --host 0.0.0.0 --port $PORT`.
 - The two deploys never share env vars. The browser only ever needs `/api/*` to resolve via the rewrite layer.
 
 ## Verify Locally

@@ -37,7 +37,6 @@ bun run setup
 ```
 AGORA_APP_ID=your_agora_app_id
 AGORA_APP_CERTIFICATE=your_agora_app_certificate
-AGENT_GREETING=Hi there! I'm Ada, your virtual assistant from Agora. How can I help?
 PORT=8000
 ```
 
@@ -45,7 +44,6 @@ PORT=8000
 | ------------------------ | -------------------- | -------- | --------------------------------------------------------------------- |
 | `AGORA_APP_ID`           | Python (server)      | Yes      | Loaded by `Agent.__init__` via `os.environ`.                          |
 | `AGORA_APP_CERTIFICATE`  | Python (server)      | Yes      | Server-only.                                                          |
-| `AGENT_GREETING`         | Python (server)      | No       | Optional first utterance.                                             |
 | `PORT`                   | Python (server)      | No       | Default `8000` (`server.py`).                                          |
 | `AGENT_BACKEND_URL`      | Next build (web)     | Yes for rewrites | Empty/missing → no `/api/*` rewrites registered. Required by `web/scripts/doctor.ts`. |
 | `NEXT_PUBLIC_AGENT_UID`  | Browser (web)        | No       | Optional UID override read in `ConversationComponent.tsx`.            |

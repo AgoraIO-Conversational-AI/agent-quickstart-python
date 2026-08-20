@@ -27,7 +27,7 @@ Implement these pieces in order:
 
 1. Create a bun workspace with `web` as a workspace member and root scripts that orchestrate backend, frontend, setup, doctor, verify, and clean tasks.
 2. Create `server/` with FastAPI, uvicorn, python-dotenv, and `agora-agents>=2.0.0` in `server/requirements.txt`.
-3. Add `server/.env.example` with `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, optional `AGENT_GREETING`, and optional `PORT`.
+3. Add `server/.env.example` with `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, and optional `PORT`.
 4. Implement `server/src/agent.py` with an `Agent` class that reads env once, constructs `AsyncAgora`, builds `AgoraAgent` with managed `DeepgramSTT`, `OpenAI`, `MiniMaxTTS`, starts async sessions, stores sessions by `agent_id`, and stops by active session or `client.stop_agent`.
 5. Implement `server/src/server.py` with `GET /get_config`, `POST /startAgent`, and `POST /stopAgent`; load `server/.env` relative to the source file.
 6. In `GET /get_config`, replace missing, zero, or negative UIDs with a generated non-zero UID, generate a one-hour RTC+RTM token with `generate_convo_ai_token`, and return `{ app_id, token, uid, channel_name, agent_uid }`.
