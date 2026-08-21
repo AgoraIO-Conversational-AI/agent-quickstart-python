@@ -26,7 +26,7 @@ bun run setup
 # runs: setup:env → setup:backend → setup:frontend → setup:done
 ```
 
-`setup:env` copies `server/.env.example` → `server/.env` if missing. It preserves an existing `server/.env` written by `agora init` or `agora quickstart env write`. `setup:backend` recreates `server/venv`, upgrades pip, and installs `requirements.txt`. `setup:frontend` runs `bun install`. `setup:deps` exists for `bun run dev:check`, not for `bun run setup`.
+`setup:env` preserves a configured `server/.env`, copies a legacy `server/.env.local` to `server/.env` when needed, or seeds `server/.env` from `server/.env.example`. If the seeded file has both example values and a CLI version writes valid credentials to the legacy path, `setup:env` and `doctor:local` copy those credentials into `server/.env`. The completion message omits the credential-writing command when the resulting file has non-placeholder Agora credentials. `setup:backend` recreates `server/venv`, upgrades pip, and installs `requirements.txt`. `setup:frontend` runs `bun install`. `setup:deps` exists for `bun run dev:check`, not for `bun run setup`.
 
 > The package.json scripts use `server/venv/` (no leading dot). `bun run dev:backend` activates `server/venv` and runs `python src/server.py` from inside `server/`. If you create the venv under a different name you'll need to adjust the scripts or symlink.
 
@@ -98,7 +98,7 @@ bun run clean                  # remove backend venv, node_modules, .next, web/d
 ## Common Setup Failures
 
 - `bun run doctor:local` fails on **"python3 not found"** → install Python ≥ 3.10.
-- Doctor fails on missing `server/.env` → run `agora quickstart env write .` or `bun run setup:env`.
+- Doctor fails on missing or placeholder credentials in `server/.env` → run `agora quickstart env write .`.
 - `cd web && bun run doctor` rejects empty/invalid `AGENT_BACKEND_URL` → ensure the URL is `http://` or `https://`.
 - `verify:web:api` fails on a new route → extend `web/scripts/verify-api-contracts.ts` to cover it.
 

@@ -51,6 +51,8 @@ bun run doctor:local
 bun run dev
 ```
 
+`bun run setup` preserves a configured `server/.env`, copies a legacy `server/.env.local` when needed, and prints the credential-writing step when the resulting file lacks real Agora values. Setup and `doctor:local` replace an untouched example file with configured legacy credentials. This supports CLI versions that wrote `.env.local`.
+
 Services:
 
 - Frontend: `http://localhost:3000`
