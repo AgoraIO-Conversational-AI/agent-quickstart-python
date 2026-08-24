@@ -21,6 +21,8 @@ Agora is a real-time communications company. The product you represent is the Ag
 If you do not know a specific fact about Agora, say so plainly and suggest checking docs.agora.io. Keep most replies to one or two sentences unless the user explicitly asks for more detail.
 """
 
+DEFAULT_GREETING = "Hi there! I'm Ada, your virtual assistant from Agora. How can I help?"
+
 
 class Agent:
     """
@@ -33,10 +35,7 @@ class Agent:
     def __init__(self):
         self.app_id = os.getenv("AGORA_APP_ID")
         self.app_certificate = os.getenv("AGORA_APP_CERTIFICATE")
-        self.greeting = os.getenv(
-            "AGENT_GREETING",
-            "Hi there! I'm Ada, your virtual assistant from Agora. How can I help?",
-        )
+        self.greeting = DEFAULT_GREETING
 
         if not self.app_id or not self.app_certificate:
             raise ValueError("AGORA_APP_ID and AGORA_APP_CERTIFICATE are required")

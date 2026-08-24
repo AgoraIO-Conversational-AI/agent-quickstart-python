@@ -12,7 +12,7 @@ Why: provider schemas, SDK builder fields, token behavior, and RTM event details
 
 | Need | Read First | Deep Detail | Source Reference |
 | --- | --- | --- | --- |
-| Project setup, commands, env vars | [../01_setup.md](../01_setup.md) | none | `package.json`, `server/.env.example`, `web/.env.local.example` |
+| Project setup, commands, env vars | [../01_setup.md](../01_setup.md) | none | `package.json`, `server/.env.example` |
 | End-to-end architecture and data flow | [../02_architecture.md](../02_architecture.md) | [session_lifecycle.md](session_lifecycle.md) | `web/src/components/LandingPage.tsx`, `web/src/components/ConversationComponent.tsx`, `server/src/server.py` |
 | File/module responsibilities | [../03_code_map.md](../03_code_map.md) | none | `web/`, `server/`, `web/scripts/` |
 | API payloads and response shapes | [../06_interfaces.md](../06_interfaces.md) | [verification_scripts.md](verification_scripts.md) | `server/src/server.py`, `web/src/services/api.ts`, `web/next.config.ts` |
@@ -27,9 +27,9 @@ Implement these pieces in order:
 
 1. Create a bun workspace with `web` as a workspace member and root scripts that orchestrate backend, frontend, setup, doctor, verify, and clean tasks.
 2. Create `server/` with FastAPI, uvicorn, python-dotenv, and `agora-agents>=2.0.0` in `server/requirements.txt`.
-3. Add `server/.env.example` with `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, optional `AGENT_GREETING`, and optional `PORT`.
+3. Add `server/.env.example` with `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, and optional `PORT`.
 4. Implement `server/src/agent.py` with an `Agent` class that reads env once, constructs `AsyncAgora`, builds `AgoraAgent` with managed `DeepgramSTT`, `OpenAI`, `MiniMaxTTS`, starts async sessions, stores sessions by `agent_id`, and stops by active session or `client.stop_agent`.
-5. Implement `server/src/server.py` with `GET /get_config`, `POST /startAgent`, and `POST /stopAgent`; load env file-relative from `server/.env.local` then `server/.env`.
+5. Implement `server/src/server.py` with `GET /get_config`, `POST /startAgent`, and `POST /stopAgent`; load `server/.env` relative to the source file.
 6. In `GET /get_config`, replace missing, zero, or negative UIDs with a generated non-zero UID, generate a one-hour RTC+RTM token with `generate_convo_ai_token`, and return `{ app_id, token, uid, channel_name, agent_uid }`.
 7. Create a Next.js App Router web app under `web/` with React, TypeScript, Tailwind, `agora-rtc-react`, `agora-rtm`, `agora-agent-client-toolkit`, and `agora-agent-uikit`.
 8. Implement `web/next.config.ts` rewrites for `/api/get_config`, `/api/startAgent`, and `/api/stopAgent` to `${AGENT_BACKEND_URL}/...`; return no rewrites when the env var is missing.

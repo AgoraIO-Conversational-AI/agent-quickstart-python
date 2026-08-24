@@ -14,10 +14,12 @@ Repo setup:
 bun run setup
 ```
 
+Setup preserves a configured `server/.env` and copies a legacy `server/.env.local` when needed. The completion message reflects the credential state. Setup and `doctor:local` replace an untouched example file with configured legacy credentials.
+
 Agora credentials:
 
 ```bash
-agora project env write server/.env.local
+agora quickstart env write .
 ```
 
 Run the app:
@@ -31,7 +33,7 @@ This assumes the Agora CLI is installed and logged in. The command uses the proj
 If you are not using the Agora CLI, create the env file manually and fill in your project values:
 
 ```bash
-cp server/.env.example server/.env.local
+cp server/.env.example server/.env
 ```
 
 From `server/`:
@@ -41,16 +43,16 @@ From `server/`:
 Backend-only Agora CLI env write:
 
 ```bash
-agora project env write .env.local
+agora quickstart env write ..
 ```
 
 Manual fallback:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-`.env.example` is the reference template. If you are not using the Agora CLI, edit `.env.local` and fill in your Agora credentials:
+`.env.example` is the reference template. If you are not using the Agora CLI, edit `.env` and fill in your Agora credentials:
 - `AGORA_APP_ID` - Your Agora App ID (Required)
 - `AGORA_APP_CERTIFICATE` - Your Agora App Certificate (Required)
 - Agora managed provider access should be enabled for this project
@@ -65,7 +67,7 @@ To select a specific existing project before writing env values:
 
 ```bash
 agora project use <project-id-or-name>
-agora project env write .env.local
+agora quickstart env write ..
 ```
 
 To create a new project instead of using your default project:
@@ -73,7 +75,7 @@ To create a new project instead of using your default project:
 ```bash
 agora project create my-first-voice-agent --feature rtc --feature convoai
 agora project use my-first-voice-agent
-agora project env write .env.local
+agora quickstart env write ..
 ```
 
 **Note**: The service uses Token007 authentication generated from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. Third-party vendor keys are not required in this default managed setup. The current default chain matches the Next.js quickstart: `DeepgramSTT` (`nova-3`) + `OpenAI` (`gpt-4o-mini`) + `MiniMaxTTS` (`speech_2_6_turbo` / `English_captivating_female1`). The FastAPI sample now uses `AsyncAgora` so the request path matches the local Agora guidance for async frameworks.
@@ -99,7 +101,7 @@ pip install -r requirements.txt
 python src/server.py
 ```
 
-The service will start on port 8000 (or the port specified in `.env.local`).
+The service will start on port 8000 (or the port specified in `.env`).
 
 ## How This Fits The Repo
 

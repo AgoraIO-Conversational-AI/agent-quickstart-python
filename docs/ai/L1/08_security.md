@@ -15,7 +15,7 @@
 | -------------- | ---------------------------------------------------------------------- |
 | Browser        | `NEXT_PUBLIC_AGENT_UID` (optional)                                     |
 | Next build/run | `AGENT_BACKEND_URL`                                                    |
-| FastAPI        | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `AGENT_GREETING`, `PORT`      |
+| FastAPI        | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `PORT`                         |
 
 Mark `AGORA_APP_CERTIFICATE` as a sensitive secret in whichever host runs the Python service. The certificate value never appears in `web/`.
 
@@ -62,9 +62,9 @@ If you need real auth, add a FastAPI dependency that validates a header on each 
 
 ## Secret Handling Rules
 
-- `server/.env.local` is the developer's secret store; do not commit it.
+- `server/.env` is the developer's secret store; do not commit it.
 - `server/.env.example` documents shape only — never put real values there.
-- `load_dotenv` reads `server/.env.local` then `server/.env` using a path derived from `server/src/server.py`; missing credentials fail startup initialization and leave routes returning `500`.
+- `load_dotenv` reads `server/.env` using a path derived from `server/src/server.py`; missing credentials fail startup initialization and leave routes returning `500`.
 - Do not log full env. `logger.error("failed: %s", err)` is fine; `logger.error(os.environ)` is not.
 
 ## CSP / Security Headers
