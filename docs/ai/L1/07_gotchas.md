@@ -78,6 +78,12 @@ RTM delivery, tool enablement, metrics, error messages, and data channel setting
 
 The repo's git history is human-authored. Keep it that way — see `AGENTS.md` "Git Conventions."
 
+## Toolkit 2.10.0 Migration
+
+Pass `rtmEngine` directly to `AgoraVoiceAI.init`; the old nested `rtmConfig` is no longer supported. Install from the repository root with Bun and commit the root `bun.lock`. `@types/bun` supplies types for the existing `bun:test` files.
+
+UIKit 1.1.0 declares an optional Toolkit ^1.2.0 peer. Bun resolves a separate Toolkit 1.2.0 for UIKit while the app uses 2.10.0. Passing type checks and a production build does not establish live session compatibility; verify transcript, agent state, metrics, and teardown in a real call before shipping.
+
 ## Related Deep Dives
 
 - [Managed Agent Config](L2/managed_agent_config.md) — Backend defaults.
