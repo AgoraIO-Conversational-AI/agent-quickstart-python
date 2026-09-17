@@ -28,7 +28,7 @@
 3. `ConversationComponent` mounts inside a dynamic `AgoraRTCProvider` (RTC client in `useRef` for StrictMode safety) and:
    - `useJoin` joins RTC.
    - `useLocalMicrophoneTrack` + `usePublish` start mic publishing.
-   - `AgoraVoiceAI.init({ rtcEngine, rtmConfig: { rtmEngine: rtmClient } })` wires transcripts, state, metrics.
+   - `AgoraVoiceAI.init({ rtcEngine, rtmEngine: rtmClient })` wires transcripts, state, metrics.
    - `subscribeMessage(channel_name)` opens the toolkit's RTM channel.
 4. End: `stopAgent(agentId)` → `POST /api/stopAgent` → FastAPI stops the agent. `rtmClient.logout()` follows.
 5. Renewal: on RTC `token-privilege-will-expire`, the client fetches `getConfig()` twice (once for RTC uid, once for the stored `agoraData.uid`) and renews RTC + RTM separately.

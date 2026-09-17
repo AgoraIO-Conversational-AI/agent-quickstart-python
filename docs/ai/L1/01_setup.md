@@ -57,10 +57,10 @@ fastapi>=0.100.0
 uvicorn>=0.20.0
 requests>=2.31.0
 python-dotenv>=1.0.0
-agora-agents>=2.0.0
+agora-agents>=2.9.0
 ```
 
-The SDK is lower-bounded at v2 — add an upper bound or exact pin if you need reproducible SDK behavior.
+The SDK requires version 2.9.0 or later.
 
 ## Quick Commands
 

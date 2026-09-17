@@ -6,7 +6,7 @@ type Rewrite = {
 }
 
 type LocalServer = {
-  port: number
+  port: number | undefined
   stop: (closeActiveConnections?: boolean) => void
 }
 
@@ -112,6 +112,7 @@ async function withStubBackend<T>(run: (baseUrl: string) => Promise<T>) {
   }
 
   try {
+    assert(typeof server.port === 'number', 'Stub backend must listen on a TCP port')
     return await run(`http://localhost:${server.port}`)
   } finally {
     server.stop(true)
