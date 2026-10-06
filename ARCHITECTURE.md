@@ -61,8 +61,8 @@ Frontend: POST /api/stopAgent { agentId }
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/get_config` | GET | Generate connection config (Token007, channel, UIDs) |
-| `/startAgent` | POST | Start the agent session |
-| `/stopAgent` | POST | Stop the agent by `agent_id` |
+| `/startAgent` | POST | Start the agent session (`/v2/startAgent` alias for R1 firmware) |
+| `/stopAgent` | POST | Stop the agent by `agent_id` (`/v2/stopAgent` alias for R1 firmware) |
 
 Frontend calls these as `/api/*`. Next rewrites those calls to `AGENT_BACKEND_URL`; the Next app does not run token or AgentKit logic in-process.
 

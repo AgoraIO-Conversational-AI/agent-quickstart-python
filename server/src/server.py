@@ -6,6 +6,9 @@ HTTP APIs:
 - GET  /get_config     -> Agent.generate_config()
 - POST /startAgent     -> Agent.start()
 - POST /stopAgent      -> Agent.stop()
+
+The /v2/startAgent and /v2/stopAgent aliases serve the R1 (BK7258) device
+firmware, which calls these paths directly.
 """
 import logging
 import os
@@ -145,6 +148,7 @@ async def get_config(
 
 
 @router.post("/startAgent")
+@router.post("/v2/startAgent")
 async def start_agent(request: StartAgentRequest):
     """Start agent in a channel"""
     if agent is None:
@@ -177,6 +181,7 @@ async def start_agent(request: StartAgentRequest):
 
 
 @router.post("/stopAgent")
+@router.post("/v2/stopAgent")
 async def stop_agent(request: StopAgentRequest):
     """Stop agent by ID"""
     if agent is None:
