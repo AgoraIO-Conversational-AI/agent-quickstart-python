@@ -4,6 +4,10 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   // Enable React strict mode
   reactStrictMode: true,
+
+  // Allow the dev server to be shared through an ngrok tunnel.
+  allowedDevOrigins: ['*.ngrok-free.app', '*.ngrok-free.dev', '*.ngrok.app', '*.ngrok.dev'],
+
   turbopack: {
     root: path.resolve(__dirname, '..'),
   },
